@@ -13,7 +13,7 @@ const ZAP_BASE_URL = process.env.ZAP_BASE_URL || 'http://localhost:8080';
 const ZAP_API_KEY = process.env.ZAP_API_KEY;
 const COLLECTOR_BASE_URL = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
 const MOVEMENT_RPC_URL =
-  process.env.MOVEMENT_RPC_URL || 'https://testnet.bardock.movementnetwork.xyz/v1';
+  process.env.NEXT_PUBLIC_FULLNODE_URL || 'https://testnet.movementnetwork.xyz/v1';
 
 export async function POST(request: NextRequest) {
   try {
@@ -32,6 +32,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Initialize scanner
+    console.log(`[Scan] Using collector URL: "${COLLECTOR_BASE_URL}"`);
     const scanner = new MiniAppScanner({
       zapBaseUrl: ZAP_BASE_URL,
       zapApiKey: ZAP_API_KEY,

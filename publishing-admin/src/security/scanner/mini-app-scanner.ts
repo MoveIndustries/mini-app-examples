@@ -39,6 +39,13 @@ export interface MiniAppScanProgress {
 
 export type MiniAppScanProgressCallback = (progress: MiniAppScanProgress) => void;
 
+export interface ScanDiagnostic {
+  action: string;
+  details: Record<string, unknown>;
+  time: number;
+  url: string;
+}
+
 export interface MiniAppScanResult {
   scanId: string;
   targetUrl: string;
@@ -61,6 +68,7 @@ export interface MiniAppScanResult {
       description: string;
     }>;
   };
+  diagnostics: ScanDiagnostic[];
   overallRisk: 'critical' | 'high' | 'medium' | 'low' | 'safe';
   recommendation: 'block' | 'review' | 'approve';
   summary: string;
@@ -76,7 +84,7 @@ export class MiniAppScanner {
       zapApiKey: config.zapApiKey || '',
       collectorBaseUrl: config.collectorBaseUrl,
       movementRpcUrl:
-        config.movementRpcUrl || 'https://testnet.bardock.movementnetwork.xyz/v1',
+        config.movementRpcUrl || 'https://testnet.movementnetwork.xyz/v1',
       maxSpiderDuration: config.maxSpiderDuration || 10,
     };
 
@@ -112,9 +120,40 @@ export class MiniAppScanner {
 
       await this.zapClient.newSession(`mini-app-${scanId}`, true);
 
-      // Configure the injection script with scanId and collector URL
+      // Create context and add URL to scope
+      const contextName = `ctx-${scanId}`;
+      await this.zapClient.newContext(contextName);
+
+      // Add the target URL pattern to the context scope
+      const urlObj = new URL(targetUrl);
+      const scopeRegex = `${urlObj.origin}.*`;
+      await this.zapClient.includeInContext(contextName, scopeRegex);
+
+      // Also add the collector URL to scope so ZAP allows outbound requests to it
       const collectorUrl = `${this.config.collectorBaseUrl}/api/security/collect-transaction`;
+      const collectorUrlObj = new URL(this.config.collectorBaseUrl);
+      const collectorScopeRegex = `${collectorUrlObj.origin}.*`;
+      await this.zapClient.includeInContext(contextName, collectorScopeRegex);
+      console.log(`Added collector to scope: ${collectorScopeRegex}`);
+
+      // Configure the injection script with scanId and collector URL
       await this.configureInjectionScript(scanId, collectorUrl);
+
+      // Enable CSP removal to allow injected scripts to run
+      try {
+        await this.zapClient.setReplacerRuleEnabled('Remove CSP', true);
+        console.log('Enabled CSP removal rule');
+      } catch {
+        console.log('Could not enable CSP removal rule (may not exist)');
+      }
+
+      // Add ngrok bypass header for requests from the browser
+      try {
+        await this.zapClient.addNgrokBypassHeader();
+        console.log('Added ngrok bypass header rule');
+      } catch {
+        console.log('Could not add ngrok bypass header rule');
+      }
 
       // Access the target URL first
       this.reportProgress(onProgress, {
@@ -125,14 +164,14 @@ export class MiniAppScanner {
 
       await this.zapClient.accessUrl(targetUrl);
 
-      // Start Ajax Spider
+      // Start Ajax Spider with context
       this.reportProgress(onProgress, {
         stage: 'spidering',
         progress: 20,
         message: 'Starting Ajax Spider',
       });
 
-      await this.zapClient.ajaxSpiderScan(targetUrl, true);
+      await this.zapClient.ajaxSpiderScan(targetUrl, true, contextName);
 
       // Wait for spider to complete
       const maxTime = this.config.maxSpiderDuration * 60 * 1000;
@@ -201,6 +240,7 @@ export class MiniAppScanner {
 
       // Cleanup
       TransactionCollector.clearScan(scanId);
+      await this.cleanupInjectionScript(scanId);
 
       // Determine overall risk
       const overallRisk = this.calculateOverallRisk(
@@ -228,6 +268,24 @@ export class MiniAppScanner {
         transactionsCaptured: capturedTransactions.length,
       });
 
+      // Get diagnostics from ZAP message history (requests to /___zap_diag___/...)
+      const zapDiagnostics = await this.zapClient.getDiagnosticsFromHistory(scanId);
+      console.log(`Found ${zapDiagnostics.length} SDK diagnostics in ZAP history`);
+
+      // Also get any diagnostics from the collector (if external requests worked)
+      const collectorDiagnostics = TransactionCollector.getDiagnostics(scanId);
+
+      // Combine both sources
+      const diagnostics = [
+        ...zapDiagnostics.map((d) => ({
+          action: d.action,
+          details: { source: 'zap-history' },
+          time: parseInt(d.timestamp, 10),
+          url: d.url,
+        })),
+        ...collectorDiagnostics,
+      ];
+
       return {
         scanId,
         targetUrl,
@@ -250,6 +308,7 @@ export class MiniAppScanner {
             description: a.description,
           })),
         },
+        diagnostics,
         overallRisk,
         recommendation,
         summary,
@@ -262,28 +321,66 @@ export class MiniAppScanner {
       });
 
       TransactionCollector.clearScan(scanId);
+      await this.cleanupInjectionScript(scanId);
       throw error;
     }
   }
 
   /**
-   * Configure the ZAP injection script with scan-specific parameters
+   * Configure the ZAP SDK injection via replacer rules
+   *
+   * This uses ZAP's replacer add-on to inject the SDK inline into all HTML responses.
+   * The SDK is inlined to avoid network issues when ZAP runs in Docker.
    */
   private async configureInjectionScript(
     scanId: string,
     collectorUrl: string
   ): Promise<void> {
-    // Note: In a production setup, you'd use ZAP's script API to load
-    // the injection script with parameters. For now, we rely on the
-    // script being pre-loaded with placeholders that get replaced.
-    //
-    // The inject-sdk.js script has __SCAN_ID__ and __COLLECTOR_URL__
-    // placeholders that should be replaced when loading the script.
-    //
-    // This is a limitation of the current implementation - in production,
-    // you'd want to use ZAP's API to dynamically configure scripts.
+    // For Docker, we need to use host.docker.internal instead of localhost
+    // Check if ZAP is on a different host (Docker)
+    let adjustedCollectorUrl = collectorUrl;
+    if (this.config.zapBaseUrl.includes('127.0.0.1') || this.config.zapBaseUrl.includes('localhost')) {
+      // ZAP is local, but if it's in Docker, the browser needs host.docker.internal
+      // Replace localhost with host.docker.internal for Docker compatibility
+      adjustedCollectorUrl = collectorUrl.replace('localhost', 'host.docker.internal');
+    }
 
-    console.log(`Scan ${scanId} configured with collector: ${collectorUrl}`);
+    console.log(`Configuring SDK injection for scan ${scanId}`);
+    console.log(`Collector URL: ${adjustedCollectorUrl}`);
+
+    try {
+      // Add the SDK injection rule with inlined SDK
+      console.log(`Adding SDK injection rule for scan ${scanId}...`);
+      await this.zapClient.addSdkInjectionRule(scanId, adjustedCollectorUrl);
+      console.log(`SDK injection rule added successfully for scan ${scanId}`);
+
+      // Verify the rule was added
+      const rules = await this.zapClient.getReplacerRules();
+      const sdkRule = rules.find((r) => {
+        const rule = r as { description?: string };
+        return rule.description?.includes(`sdk-injection-${scanId}`);
+      });
+      if (sdkRule) {
+        console.log(`Verified: SDK injection rule exists`);
+      } else {
+        console.warn(`Warning: SDK injection rule not found after adding`);
+      }
+    } catch (error) {
+      console.error('Failed to configure SDK injection:', error);
+      // Don't fail the scan if injection setup fails - we can still do web vuln scanning
+    }
+  }
+
+  /**
+   * Clean up SDK injection rules after scan
+   */
+  private async cleanupInjectionScript(scanId: string): Promise<void> {
+    try {
+      await this.zapClient.removeSdkInjectionRule(scanId);
+      console.log(`SDK injection rule removed for scan ${scanId}`);
+    } catch (error) {
+      console.warn('Failed to cleanup SDK injection rule:', error);
+    }
   }
 
   /**

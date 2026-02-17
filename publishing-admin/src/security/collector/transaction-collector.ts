@@ -15,8 +15,16 @@ export interface CollectedTransaction {
   triggeredBy?: string; // element that triggered it, if known
 }
 
+export interface Diagnostic {
+  action: string;
+  details: Record<string, unknown>;
+  time: number;
+  url: string;
+}
+
 // In-memory store - keyed by scanId
 const transactionStore: Map<string, CollectedTransaction[]> = new Map();
+const diagnosticStore: Map<string, Diagnostic[]> = new Map();
 
 // Auto-cleanup old scans after 1 hour
 const SCAN_TTL_MS = 60 * 60 * 1000;
@@ -27,6 +35,7 @@ function cleanupOldScans() {
   for (const [scanId, timestamp] of scanTimestamps.entries()) {
     if (now - timestamp > SCAN_TTL_MS) {
       transactionStore.delete(scanId);
+      diagnosticStore.delete(scanId);
       scanTimestamps.delete(scanId);
     }
   }
@@ -41,6 +50,7 @@ export const TransactionCollector = {
    */
   initScan(scanId: string): void {
     transactionStore.set(scanId, []);
+    diagnosticStore.set(scanId, []);
     scanTimestamps.set(scanId, Date.now());
   },
 
@@ -71,6 +81,7 @@ export const TransactionCollector = {
    */
   clearScan(scanId: string): void {
     transactionStore.delete(scanId);
+    diagnosticStore.delete(scanId);
     scanTimestamps.delete(scanId);
   },
 
@@ -79,5 +90,22 @@ export const TransactionCollector = {
    */
   getTransactionCount(scanId: string): number {
     return transactionStore.get(scanId)?.length || 0;
+  },
+
+  /**
+   * Add a diagnostic entry
+   */
+  addDiagnostic(scanId: string, diagnostic: Diagnostic): void {
+    if (!diagnosticStore.has(scanId)) {
+      diagnosticStore.set(scanId, []);
+    }
+    diagnosticStore.get(scanId)!.push(diagnostic);
+  },
+
+  /**
+   * Get all diagnostics for a scan
+   */
+  getDiagnostics(scanId: string): Diagnostic[] {
+    return diagnosticStore.get(scanId) || [];
   },
 };

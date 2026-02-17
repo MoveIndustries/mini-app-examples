@@ -295,6 +295,78 @@ export function SecurityScanPanel({ app, onScanComplete }: SecurityScanPanelProp
                 </div>
               )}
 
+              {/* SDK Diagnostics */}
+              {result.diagnostics && result.diagnostics.length > 0 && (
+                <div>
+                  <h4 className="text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wide mb-2">
+                    SDK Diagnostics ({result.diagnostics.length} events)
+                  </h4>
+                  <div className="space-y-2 max-h-48 overflow-y-auto">
+                    {result.diagnostics.map((diag, i) => {
+                      // Parse action - new format: sdk_ready_0x..., filled_1, clicking_post, etc.
+                      const action = diag.action || '';
+                      const isInjected = action === 'sdk_injected';
+                      const isSdkReady = action.startsWith('sdk_ready');
+                      const isFilled = action.startsWith('filled_');
+                      const isClicking = action.startsWith('clicking_');
+                      const isClicked = action.startsWith('clicked_');
+                      const isTxCaptured = action === 'tx_captured';
+
+                      // Extract data from action string
+                      const address = isSdkReady ? action.replace('sdk_ready_', '') : '';
+                      const filledCount = isFilled ? action.replace('filled_', '') : '';
+                      const clickedCount = isClicked ? action.replace('clicked_', '') : '';
+                      const clickingBtn = isClicking ? action.replace('clicking_', '') : '';
+
+                      return (
+                        <div
+                          key={i}
+                          className="rounded-lg p-2 text-xs bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700"
+                        >
+                          <div className="flex items-center gap-2">
+                            <span className={`font-semibold ${
+                              isInjected ? 'text-green-600 dark:text-green-400' :
+                              isSdkReady ? 'text-green-600 dark:text-green-400' :
+                              isFilled ? 'text-blue-600 dark:text-blue-400' :
+                              isClicking || isClicked ? 'text-purple-600 dark:text-purple-400' :
+                              isTxCaptured ? 'text-red-600 dark:text-red-400' :
+                              'text-gray-600 dark:text-gray-400'
+                            }`}>
+                              {isInjected && '✓ SDK Injected'}
+                              {isSdkReady && '✓ SDK Ready'}
+                              {isFilled && '📝 Filled Inputs'}
+                              {isClicking && '👆 Clicking Button'}
+                              {isClicked && '👆 Clicked Buttons'}
+                              {isTxCaptured && '🔴 TX Captured!'}
+                              {!isInjected && !isSdkReady && !isFilled && !isClicking && !isClicked && !isTxCaptured && action}
+                            </span>
+                          </div>
+                          <p className="text-gray-600 dark:text-gray-400 mt-1">
+                            {isSdkReady && address && <>Address: {address}...</>}
+                            {isFilled && <>Filled {filledCount} field(s)</>}
+                            {isClicking && <>Button: &quot;{clickingBtn}&quot;</>}
+                            {isClicked && <>Clicked {clickedCount} button(s)</>}
+                          </p>
+                          <p className="text-gray-400 mt-1 truncate">{diag.url}</p>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+
+              {/* No diagnostics warning */}
+              {(!result.diagnostics || result.diagnostics.length === 0) && (
+                <div className="bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-800 rounded-lg p-3">
+                  <p className="text-sm text-orange-700 dark:text-orange-300 font-medium">
+                    No SDK diagnostics received
+                  </p>
+                  <p className="text-xs text-orange-600 dark:text-orange-400 mt-1">
+                    The SDK injection may not have worked. Check that ZAP can reach your app and the replacer rule was added.
+                  </p>
+                </div>
+              )}
+
               {/* Summary */}
               <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-3 border border-gray-200 dark:border-gray-700">
                 <pre className="text-xs text-gray-700 dark:text-gray-300 whitespace-pre-wrap font-mono">

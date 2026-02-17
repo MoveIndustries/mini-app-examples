@@ -71,7 +71,7 @@ export class TransactionAnalyzer {
   private signerPublicKey: string;
 
   constructor(
-    rpcUrl: string = 'https://testnet.bardock.movementnetwork.xyz/v1',
+    rpcUrl: string = 'https://testnet.movementnetwork.xyz/v1',
     signerAddress: string,
     signerPublicKey: string
   ) {

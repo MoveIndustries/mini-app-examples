@@ -1,1 +1,1 @@
-export { TransactionCollector, type CollectedTransaction } from './transaction-collector';
+export { TransactionCollector, type CollectedTransaction, type Diagnostic } from './transaction-collector';

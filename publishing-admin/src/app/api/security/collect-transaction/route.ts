@@ -8,6 +8,17 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { TransactionCollector } from '@/security/collector';
 
+// CORS headers for cross-origin requests from scanned apps
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+  'Access-Control-Allow-Headers': 'Content-Type',
+};
+
+export async function OPTIONS() {
+  return new NextResponse(null, { status: 200, headers: corsHeaders });
+}
+
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
@@ -33,12 +44,12 @@ export async function POST(request: NextRequest) {
       success: true,
       message: 'Transaction captured',
       totalCaptured: count,
-    });
+    }, { headers: corsHeaders });
   } catch (error) {
     console.error('Error collecting transaction:', error);
     return NextResponse.json(
       { error: 'Failed to collect transaction' },
-      { status: 500 }
+      { status: 500, headers: corsHeaders }
     );
   }
 }
