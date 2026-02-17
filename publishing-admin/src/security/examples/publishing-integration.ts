@@ -25,13 +25,9 @@ export async function checkMiniAppSecurity(
 
   console.log('[Publishing] Running security check for:', miniAppUrl);
 
-  const result = await scanner.scan(
-    {
-      url: miniAppUrl,
-      includeActiveScan: true,
-      maxDuration: 20,
-      reportDir: './security-reports',
-    },
+  // Using quickScan for serverless-compatible scanning
+  const result = await scanner.quickScan(
+    miniAppUrl,
     (progress) => {
       console.log(`[Publishing] ${progress.stage}: ${progress.message}`);
     }

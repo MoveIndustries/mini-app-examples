@@ -26,7 +26,11 @@ function browserLaunched(ssutils, msg) {
 
     console.log('[ZAP Injection] Injecting Movement Mini App SDK...');
 
-    // Mock Wallet Implementation
+    // Configuration - these will be replaced by the scanner
+    var SCAN_ID = '__SCAN_ID__';
+    var COLLECTOR_URL = '__COLLECTOR_URL__';
+
+    // Mock Wallet Implementation with transaction capture
     class MockWallet {
       constructor() {
         this.address = '0x' + Array.from({ length: 64 }, () =>
@@ -35,6 +39,7 @@ function browserLaunched(ssutils, msg) {
         this.publicKey = '0x' + Array.from({ length: 64 }, () =>
           Math.floor(Math.random() * 16).toString(16)
         ).join('');
+        this.capturedTransactions = [];
       }
 
       async getAccount() {
@@ -45,8 +50,37 @@ function browserLaunched(ssutils, msg) {
         };
       }
 
+      async captureAndReport(payload) {
+        // Store locally
+        this.capturedTransactions.push({
+          payload: payload,
+          timestamp: Date.now(),
+          url: window.location.href
+        });
+
+        // Report to collector if configured
+        if (COLLECTOR_URL && COLLECTOR_URL !== '__COLLECTOR_URL__') {
+          try {
+            await fetch(COLLECTOR_URL, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                scanId: SCAN_ID,
+                payload: payload,
+                url: window.location.href,
+                triggeredBy: document.activeElement?.tagName || 'unknown'
+              })
+            });
+            console.log('[Mock Wallet] Transaction reported to collector');
+          } catch (e) {
+            console.warn('[Mock Wallet] Failed to report transaction:', e);
+          }
+        }
+      }
+
       async signTransaction(payload) {
-        console.log('[Mock Wallet] Signing transaction:', payload);
+        console.log('[Mock Wallet] Capturing transaction:', payload);
+        await this.captureAndReport(payload);
         return {
           hash: '0x' + Array.from({ length: 64 }, () =>
             Math.floor(Math.random() * 16).toString(16)
@@ -63,6 +97,10 @@ function browserLaunched(ssutils, msg) {
           ).join(''),
           publicKey: this.publicKey
         };
+      }
+
+      getCapturedTransactions() {
+        return this.capturedTransactions;
       }
     }
 
@@ -198,7 +236,13 @@ function browserLaunched(ssutils, msg) {
       }
 
       async signAndSubmitTransaction(payload) {
-        return await this.signTransaction(payload);
+        console.log('[SDK] Sign and submit transaction:', payload);
+        return await this.mockWallet.signTransaction(payload);
+      }
+
+      // For retrieving captured transactions (useful for debugging)
+      getCapturedTransactions() {
+        return this.mockWallet.getCapturedTransactions();
       }
 
       async signMessage(payload) {

@@ -5,5 +5,5 @@
  */
 
 export { MovementMiniAppSDKWeb, movementSDK } from './mini-app-sdk-web';
-export { MockWallet } from './mock-wallet';
+export { MockWallet, type CapturedTransaction } from './mock-wallet';
 export * from './types';

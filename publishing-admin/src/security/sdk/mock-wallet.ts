@@ -14,9 +14,16 @@ import type {
   TransactionResponse,
 } from './types';
 
+export interface CapturedTransaction {
+  payload: TransactionPayload;
+  response: TransactionResponse;
+  timestamp: number;
+}
+
 export class MockWallet {
   private config: Required<MockWalletConfig>;
   private transactionHistory: TransactionResponse[] = [];
+  private capturedTransactions: CapturedTransaction[] = [];
 
   constructor(config: MockWalletConfig = {}) {
     this.config = {
@@ -84,10 +91,18 @@ export class MockWallet {
       success: true,
     };
 
+    // Capture the full transaction for analysis
+    this.capturedTransactions.push({
+      payload,
+      response,
+      timestamp: Date.now(),
+    });
+
     this.transactionHistory.push(response);
 
-    console.log('[Mock Wallet] Transaction signed:', {
+    console.log('[Mock Wallet] Transaction captured:', {
       function: payload.function,
+      arguments: payload.arguments,
       hash: response.hash,
     });
 
@@ -122,6 +137,20 @@ export class MockWallet {
 
   getTransactionHistory(): TransactionResponse[] {
     return [...this.transactionHistory];
+  }
+
+  /**
+   * Get all captured transactions with full payloads for analysis
+   */
+  getCapturedTransactions(): CapturedTransaction[] {
+    return [...this.capturedTransactions];
+  }
+
+  /**
+   * Clear captured transactions (call after analysis)
+   */
+  clearCapturedTransactions(): void {
+    this.capturedTransactions = [];
   }
 
   getAddress(): string {

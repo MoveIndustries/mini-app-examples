@@ -244,9 +244,9 @@ export class ZapClient {
   // Selenium API
   // ============================================================================
 
-  async setSeleniumBrowserArguments(arguments: string): Promise<void> {
+  async setSeleniumBrowserArguments(browserArgs: string): Promise<void> {
     await this.request('/JSON/selenium/action/setBrowserArguments/', {
-      arguments,
+      arguments: browserArgs,
     });
   }
 

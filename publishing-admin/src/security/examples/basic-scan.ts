@@ -16,13 +16,10 @@ async function runBasicScan() {
   const scanner = new MiniAppSecurityScanner('http://localhost:8080');
 
   try {
-    const result = await scanner.scan(
-      {
-        url: miniAppUrl,
-        includeActiveScan: true,
-        maxDuration: 30,
-        reportDir: './security-reports',
-      },
+    // Using quickScan for serverless-compatible scanning
+    // For full active scans, use a background job queue
+    const result = await scanner.quickScan(
+      miniAppUrl,
       (progress) => {
         console.log(
           `[${progress.stage.toUpperCase()}] ${progress.message} (${progress.progress}%)`
@@ -54,7 +51,7 @@ async function runBasicScan() {
       console.log('✓ No high-risk vulnerabilities found!');
     }
 
-    console.log('\nFull report saved to ./security-reports/');
+    console.log('\nScan complete. Results returned as JSON (no disk storage in serverless mode).');
 
     process.exit(result.summary.high > 0 ? 1 : 0);
   } catch (error) {
