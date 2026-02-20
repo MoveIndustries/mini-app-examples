@@ -11,7 +11,7 @@
   "dependencies": {
     "@movement-labs/miniapp-sdk": "github:MoveIndustries/mini-app-sdk",
     "@tailwindcss/postcss": "^4.1.14",
-    "next": "^15.5.4",
+    "next": "15.5.9",
     "react": "^19.2.0",
     "react-dom": "^19.2.0"
   },
