@@ -1,7 +1,7 @@
 "use client";
 
+import { useMovementSDK } from "@movement-labs/miniapp-sdk";
 import { useEffect, useState } from "react";
-import { useMovementSDK, type MovementSDK } from "@movement-labs/miniapp-sdk";
 import { SOCIAL_MODULE_ADDRESS } from "../constants";
 
 type Post = {
@@ -255,7 +255,7 @@ export default function SocialPage() {
       };
 
       // Generate share URL - use cleaner ?owner=&index= format
-      // This is shorter, works on all platforms, and fetches from blockchain for authenticity
+      // This is shorter, works on all platforms and fetches from blockchain for authenticity
       const baseUrl =
         process.env.NEXT_PUBLIC_SHARING_URL ||
         "https://mini-app-sharing.vercel.app";
