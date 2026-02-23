@@ -13,8 +13,8 @@
     "@tailwindcss/postcss": "^4.1.14",
     "movement-design-system": "github:moveindustries/movement-design-system",
     "next": "15.5.9",
-    "react": "^19.2.0",
-    "react-dom": "^19.2.0"
+    "react": "^19.2.4",
+    "react-dom": "^19.2.4"
   },
   "devDependencies": {
     "@types/node": "^24.6.2",
