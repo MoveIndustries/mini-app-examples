@@ -3,8 +3,8 @@ import { ref, computed, onMounted, nextTick, watch } from 'vue'
 import { Aptos, AptosConfig, Network } from '@aptos-labs/ts-sdk'
 
 // Registry address - update this after contract deployment
-const REGISTRY_ADDRESS = ref('0xea3dea8b6390b119fc52d3c81b5d40a870594da21cdcc041dbb55e6c8968e886')
-const TEST_MODE = ref(true) // Toggle between mainnet and testnet
+const REGISTRY_ADDRESS = ref('0xe8c84530749dd8294c635aa5af50d95025dc0261603cb83f69a608e1ded8eb0f')
+const TEST_MODE = ref(false) // Toggle between mainnet and testnet
 
 // App state
 const connected = ref(false)

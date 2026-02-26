@@ -296,7 +296,7 @@ export default function Dashboard() {
                 ⚠️ Important: Configure Your Wallet
               </p>
               <p className="text-xs text-blue-800 dark:text-blue-200">
-                Make sure your wallet is configured for <strong>Movement Network Testnet</strong> before connecting.
+                Make sure your wallet is configured for <strong>Movement Network Mainnet</strong> before connecting.
               </p>
             </div>
           </div>
