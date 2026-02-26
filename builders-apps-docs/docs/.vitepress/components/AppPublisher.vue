@@ -114,7 +114,7 @@ MINI APP DEVELOPER AGREEMENT
 
 Effective Date: The date you click "I Agree," access the Developer Portal, or submit a Mini App for review (the "Effective Date").
 
-By clicking "I Agree," accessing the Movement Developer Portal (the "Portal"), submitting a Mini App for review, or otherwise integrating or deploying a Mini App within the Movement SuperApp (the "App"), you ("Developer", "you", or "your") agree to be bound by this Agreement with Movement Network Foundation ("App Operator", "we", "us", or "our"), a Cayman Islands foundation company. If you are entering into this Agreement on behalf of a company or other legal entity, you represent that you have the authority to bind such entity. If you do not agree to all terms and conditions of this Agreement, you may not access the Portal or submit any Mini App.
+By clicking "I Agree," accessing the Movement Developer Portal (the "Portal"), submitting a Mini App for review, or otherwise integrating or deploying a Mini App within the Movement Apps (the "App"), you ("Developer", "you", or "your") agree to be bound by this Agreement with Movement Network Foundation ("App Operator", "we", "us", or "our"), a Cayman Islands foundation company. If you are entering into this Agreement on behalf of a company or other legal entity, you represent that you have the authority to bind such entity. If you do not agree to all terms and conditions of this Agreement, you may not access the Portal or submit any Mini App.
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
@@ -128,7 +128,7 @@ THIS AGREEMENT CONTAINS AN ARBITRATION CLAUSE, WHICH IS CONTAINED BELOW UNDER TH
 
 1.1 "Affiliate" means, with respect to any entity, any other entity that directly or indirectly controls, is controlled by, or is under common control with such entity.
 
-1.2 "App" means the Movement SuperApp mobile application and related interfaces operated by App Operator, which serves as a non-custodial container for Mini Apps.
+1.2 "App" means the Movement Apps mobile application and related interfaces operated by App Operator, which serves as a non-custodial container for Mini Apps.
 
 1.3 "App Operator Marks" means the trademarks, service marks, logos, and brand names of App Operator provided to Developer for integration purposes.
 
@@ -148,7 +148,7 @@ THIS AGREEMENT CONTAINS AN ARBITRATION CLAUSE, WHICH IS CONTAINED BELOW UNDER TH
 
 1.11 "Term" means the period commencing on the Effective Date and continuing until this Agreement is terminated as set forth in Section 18.
 
-1.12 "Terms of Service" means App Operator's Movement SuperApp Terms of Service, applicable to end users of the App, as amended from time to time.
+1.12 "Terms of Service" means App Operator's Movement Apps Terms of Service, applicable to end users of the App, as amended from time to time.
 
 1.13 "Users" means end users of the App who interact with Mini Apps.
 
@@ -443,10 +443,10 @@ PLEASE READ THIS SECTION CAREFULLY — IT AFFECTS YOUR LEGAL RIGHTS AND GOVERNS 
 18.8 Severability. If any provision of this Section 18 (other than the class action waiver) is found to be unenforceable, that provision shall be severed and the remaining provisions shall remain in full force and effect.
 
 18.9 Coordinated Dispute Resolution; Joinder. If any claim, dispute, or proceeding is initiated by a User that names both App Operator and Developer as respondents or defendants, or that otherwise arises out of substantially the same facts, transactions, or occurrences involving both the App and the Mini App (a "Coordinated Claim"), Developer agrees as follows:
-  (a) Venue Alignment. Developer agrees that such Coordinated Claim shall be resolved in the same forum, jurisdiction, and dispute resolution framework that governs the User's agreement with App Operator under the then-current Movement SuperApp Terms of Service, including any applicable arbitration provision, governing law, venue selection, and class action waiver.
-  (b) Consent to Participation. Developer irrevocably consents to participate in, and not oppose or seek to transfer, dismiss, stay, or compel separation of, any Coordinated Claim filed or initiated in the forum required by the applicable SuperApp Terms of Service.
-  (c) Arbitration Joinder. Where the applicable SuperApp Terms of Service require arbitration, Developer agrees to participate in the same arbitral forum, seat, and governing law, and to cooperate in good faith to permit joinder, consolidation, or coordinated administration of proceedings to the extent permitted by the applicable arbitration rules.
-  (d) No Inconsistent Position. Developer will not assert any position in a Coordinated Claim that is inconsistent with the enforceability of the dispute resolution, arbitration, or venue provisions contained in the SuperApp Terms of Service.
+  (a) Venue Alignment. Developer agrees that such Coordinated Claim shall be resolved in the same forum, jurisdiction, and dispute resolution framework that governs the User's agreement with App Operator under the then-current Movement Apps Terms of Service, including any applicable arbitration provision, governing law, venue selection, and class action waiver.
+  (b) Consent to Participation. Developer irrevocably consents to participate in, and not oppose or seek to transfer, dismiss, stay, or compel separation of, any Coordinated Claim filed or initiated in the forum required by the applicable Movement Apps Terms of Service.
+  (c) Arbitration Joinder. Where the applicable Movement Apps Terms of Service require arbitration, Developer agrees to participate in the same arbitral forum, seat, and governing law, and to cooperate in good faith to permit joinder, consolidation, or coordinated administration of proceedings to the extent permitted by the applicable arbitration rules.
+  (d) No Inconsistent Position. Developer will not assert any position in a Coordinated Claim that is inconsistent with the enforceability of the dispute resolution, arbitration, or venue provisions contained in the Movement Apps Terms of Service.
   (e) Reservation of Substantive Defenses. Nothing in this Section limits Developer's ability to assert substantive defenses on the merits of any claim; this Section governs only procedural alignment and forum coordination.
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
