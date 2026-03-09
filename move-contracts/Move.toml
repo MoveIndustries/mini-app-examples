@@ -3,6 +3,7 @@ name = "app_registry"
 version = "1.0.0"
 authors = ["ME Team"]
 license = "MIT"
+upgrade_policy = "immutable"
 
 [addresses]
 app_registry = "_"
