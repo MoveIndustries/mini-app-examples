@@ -168,7 +168,7 @@ export function AppCard({
                 disabled={isProcessing}
                 className="ml-auto px-4 py-2 bg-green-600 hover:bg-green-700 text-white text-sm font-medium rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {isProcessing ? 'Processing...' : 'Approve Anyway'}
+                {isProcessing ? 'Processing...' : 'Propose Approval'}
               </button>
             )}
 
@@ -178,7 +178,7 @@ export function AppCard({
                 disabled={isProcessing}
                 className="ml-auto px-4 py-2 bg-oracle-orange-500 hover:bg-oracle-orange-600 text-white text-sm font-medium rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {isProcessing ? 'Processing...' : 'Revert to Pending'}
+                {isProcessing ? 'Processing...' : 'Propose Revert'}
               </button>
             )}
 
@@ -221,10 +221,10 @@ export function AppCard({
             onClick={(e) => e.stopPropagation()}
           >
             <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100 mb-4">
-              Reject Application
+              Propose Reject
             </h3>
             <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
-              Please provide a reason for rejecting <strong>{app.name}</strong>:
+              Provide a reason for proposing rejection of <strong>{app.name}</strong>:
             </p>
             <textarea
               value={rejectReason}
@@ -245,7 +245,7 @@ export function AppCard({
                 disabled={!rejectReason.trim()}
                 className="flex-1 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                Reject App
+                Create Proposal
               </button>
             </div>
           </div>
@@ -580,7 +580,7 @@ function AppDetailsModal({
                   <textarea
                     value={rejectReason}
                     onChange={(e) => setRejectReason(e.target.value)}
-                    placeholder="Reason for rejection..."
+                    placeholder="Reason for rejection proposal..."
                     className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
                     rows={3}
                   />
@@ -601,7 +601,7 @@ function AppDetailsModal({
                       disabled={!rejectReason.trim() || isProcessing || !onReject}
                       className="flex-1 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                      {isProcessing ? 'Rejecting...' : 'Confirm Reject'}
+                      {isProcessing ? 'Processing...' : 'Propose Reject'}
                     </button>
                   </div>
                 </div>
@@ -613,7 +613,7 @@ function AppDetailsModal({
                       disabled={isProcessing}
                       className="flex-1 px-4 py-2 bg-red-600 hover:bg-red-700 text-white text-sm font-medium rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                      Reject
+                      Propose Reject
                     </button>
                   )}
                   <button
@@ -628,7 +628,7 @@ function AppDetailsModal({
                     disabled={!canApprove || isProcessing}
                     className="flex-1 px-4 py-2 bg-green-600 hover:bg-green-700 text-white text-sm font-medium rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    {isProcessing ? 'Approving...' : canApprove ? (isReviewingUpdate ? 'Approve Update' : 'Approve') : 'Complete Review to Approve'}
+                    {isProcessing ? 'Creating Proposal...' : canApprove ? (isReviewingUpdate ? 'Propose Update Approval' : 'Propose Approval') : 'Complete Review to Propose'}
                   </button>
                 </div>
               )}

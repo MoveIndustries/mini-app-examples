@@ -7,22 +7,29 @@ import { ToastContainer, showToast } from '@/components/Toast';
 import { TreasuryManagement } from '@/components/TreasuryManagement';
 import { WalletButton } from '@/components/WalletButton';
 import {
-  approveApp,
-  approveRejectedApp,
-  approveUpdate,
-  checkIsOwner,
+  approveMultisigTransaction,
+  executeMultisigTransaction,
   getAllApps,
+  getMultisigOwners,
+  getMultisigThreshold,
   getPendingChange,
+  getPendingMultisigTransactions,
   getStats,
   hasPendingChange,
-  rejectApp,
-  revertToPending,
+  isMultisigSigner,
+  MultisigTransaction,
+  proposeApproveApp,
+  proposeApproveRejectedApp,
+  proposeApproveUpdate,
+  proposeRejectApp,
+  proposeRevertToPending,
+  rejectMultisigTransaction,
 } from '@/lib/aptos';
 import { AppMetadata, AppStatus } from '@/types/app';
-import { useWallet } from '@aptos-labs/wallet-adapter-react';
+import { useWallet } from '@moveindustries/wallet-adapter-react';
 import { useEffect, useState } from 'react';
 
-type TabType = 'all' | 'pending' | 'approved' | 'rejected' | 'updates';
+type TabType = 'all' | 'pending' | 'approved' | 'rejected' | 'updates' | 'proposals';
 
 export default function Dashboard() {
   const { account, signTransaction } = useWallet();
@@ -35,28 +42,67 @@ export default function Dashboard() {
   const [processingApp, setProcessingApp] = useState<number | null>(null);
   const [userIsAdmin, setUserIsAdmin] = useState(false);
   const [checkingAdmin, setCheckingAdmin] = useState(true);
+  // Multisig state
+  const [multisigProposals, setMultisigProposals] = useState<MultisigTransaction[]>([]);
+  const [multisigThreshold, setMultisigThreshold] = useState(0);
+  const [multisigOwners, setMultisigOwners] = useState<string[]>([]);
+  const [processingProposal, setProcessingProposal] = useState<number | null>(null);
+  const [adminCheckError, setAdminCheckError] = useState<string | null>(null);
+  const [isVerified, setIsVerified] = useState(false);
 
-  // Check if connected wallet is an on-chain owner
+  // Check verification status from session storage
+  useEffect(() => {
+    const checkVerification = () => {
+      if (account?.address) {
+        const verified = sessionStorage.getItem('wallet_verified');
+        const addressStr = account.address.toString();
+        setIsVerified(verified === addressStr);
+      } else {
+        setIsVerified(false);
+      }
+    };
+
+    checkVerification();
+
+    // Listen for verification events from WalletButton
+    const handleVerified = () => checkVerification();
+    window.addEventListener('wallet-verified', handleVerified);
+    return () => window.removeEventListener('wallet-verified', handleVerified);
+  }, [account?.address]);
+
+  // Check if connected wallet is a multisig signer (only after verification)
   useEffect(() => {
     const checkAdminStatus = async () => {
-      if (!account?.address) {
+      if (!account?.address || !isVerified) {
         setUserIsAdmin(false);
         setCheckingAdmin(false);
+        setAdminCheckError(null);
         return;
       }
       setCheckingAdmin(true);
+      setAdminCheckError(null);
       try {
-        const isOwner = await checkIsOwner(account.address);
-        setUserIsAdmin(isOwner);
+        const isSigner = await isMultisigSigner(account.address.toString());
+        setUserIsAdmin(isSigner);
+        if (isSigner) {
+          // Also fetch multisig info
+          const [threshold, owners] = await Promise.all([
+            getMultisigThreshold(),
+            getMultisigOwners(),
+          ]);
+          setMultisigThreshold(threshold);
+          setMultisigOwners(owners);
+        }
       } catch (error) {
         console.error('Error checking admin status:', error);
         setUserIsAdmin(false);
+        setAdminCheckError(error instanceof Error ? error.message : 'Failed to check admin status');
       } finally {
         setCheckingAdmin(false);
       }
     };
     checkAdminStatus();
-  }, [account?.address]);
+  }, [account?.address, isVerified]);
 
   useEffect(() => {
     // Only load data if user is logged in AND is an admin
@@ -79,14 +125,16 @@ export default function Dashboard() {
 
     setLoading(true);
     try {
-      const [allApps, registryStats] = await Promise.all([
-        getAllApps(account.address),
+      const [allApps, registryStats, proposals] = await Promise.all([
+        getAllApps(account.address.toString()),
         getStats(),
+        getPendingMultisigTransactions(),
       ]);
 
       console.log('Loaded apps:', allApps);
       console.log('Apps count:', allApps.length);
       console.log('Stats:', registryStats);
+      console.log('Pending multisig proposals:', proposals);
 
       allApps.forEach((app, index) => {
         console.log(`App ${index}:`, {
@@ -98,6 +146,23 @@ export default function Dashboard() {
 
       setApps(allApps);
       setStats(registryStats);
+
+      // Enrich proposals with app names from loaded apps
+      const enrichedProposals = proposals.map(proposal => {
+        if (proposal.decodedAction?.appId !== undefined) {
+          // Compare as strings since app_id from chain is a string
+          const appIdStr = String(proposal.decodedAction.appId);
+          const app = allApps.find(a => String(a.app_id) === appIdStr);
+          if (app) {
+            proposal.decodedAction = {
+              ...proposal.decodedAction,
+              label: `${proposal.decodedAction.label.replace(/#\d+$/, '')} "${app.name}"`,
+            };
+          }
+        }
+        return proposal;
+      });
+      setMultisigProposals(enrichedProposals);
 
       // Check for pending updates and fetch change details
       const updates = new Set<number>();
@@ -125,103 +190,168 @@ export default function Dashboard() {
     }
   };
 
+  // Propose approval (creates multisig proposal)
   const handleApprove = async (appId: number) => {
     if (!userIsAdmin || !account || !signTransaction) return;
 
     setProcessingApp(appId);
     try {
-      const success = await approveApp(account, signTransaction, appId);
+      const success = await proposeApproveApp(account, signTransaction, appId);
       if (success) {
         await loadData();
-        showToast('App approved successfully!', 'success');
+        showToast('Approval proposal created! Other signers need to approve.', 'success');
       } else {
-        showToast('Failed to approve app', 'error');
+        showToast('Failed to create approval proposal', 'error');
       }
     } catch (error) {
-      console.error('Error approving app:', error);
-      showToast('Error approving app', 'error');
+      console.error('Error creating approval proposal:', error);
+      showToast('Error creating approval proposal', 'error');
     } finally {
       setProcessingApp(null);
     }
   };
 
+  // Propose rejection (creates multisig proposal)
   const handleReject = async (appId: number, reason: string) => {
     if (!userIsAdmin || !account || !signTransaction) return;
 
     setProcessingApp(appId);
     try {
-      const success = await rejectApp(account, signTransaction, appId, reason);
+      const success = await proposeRejectApp(account, signTransaction, appId, reason);
       if (success) {
         await loadData();
-        showToast('App rejected successfully', 'success');
+        showToast('Rejection proposal created! Other signers need to approve.', 'success');
       } else {
-        showToast('Failed to reject app', 'error');
+        showToast('Failed to create rejection proposal', 'error');
       }
     } catch (error) {
-      console.error('Error rejecting app:', error);
-      showToast('Error rejecting app', 'error');
+      console.error('Error creating rejection proposal:', error);
+      showToast('Error creating rejection proposal', 'error');
     } finally {
       setProcessingApp(null);
     }
   };
 
+  // Propose update approval (creates multisig proposal)
   const handleApproveUpdate = async (appId: number) => {
     if (!userIsAdmin || !account || !signTransaction) return;
 
     setProcessingApp(appId);
     try {
-      const success = await approveUpdate(account, signTransaction, appId);
+      const success = await proposeApproveUpdate(account, signTransaction, appId);
       if (success) {
         await loadData();
-        showToast('Update approved successfully!', 'success');
+        showToast('Update approval proposal created!', 'success');
       } else {
-        showToast('Failed to approve update', 'error');
+        showToast('Failed to create update approval proposal', 'error');
       }
     } catch (error) {
-      console.error('Error approving update:', error);
-      showToast('Error approving update', 'error');
+      console.error('Error creating update approval proposal:', error);
+      showToast('Error creating update approval proposal', 'error');
     } finally {
       setProcessingApp(null);
     }
   };
 
+  // Propose approval of rejected app (creates multisig proposal)
   const handleApproveRejected = async (appId: number) => {
     if (!userIsAdmin || !account || !signTransaction) return;
 
     setProcessingApp(appId);
     try {
-      const success = await approveRejectedApp(account, signTransaction, appId);
+      const success = await proposeApproveRejectedApp(account, signTransaction, appId);
       if (success) {
         await loadData();
-        showToast('Rejected app approved successfully!', 'success');
+        showToast('Approval proposal for rejected app created!', 'success');
       } else {
-        showToast('Failed to approve rejected app', 'error');
+        showToast('Failed to create approval proposal', 'error');
       }
     } catch (error) {
-      console.error('Error approving rejected app:', error);
-      showToast('Error approving rejected app', 'error');
+      console.error('Error creating approval proposal:', error);
+      showToast('Error creating approval proposal', 'error');
     } finally {
       setProcessingApp(null);
     }
   };
 
+  // Propose revert to pending (creates multisig proposal)
   const handleRevertToPending = async (appId: number) => {
     if (!userIsAdmin || !account || !signTransaction) return;
 
     setProcessingApp(appId);
     try {
-      const success = await revertToPending(account, signTransaction, appId);
+      const success = await proposeRevertToPending(account, signTransaction, appId);
       if (success) {
         await loadData();
-        showToast('App reverted to pending for re-review', 'success');
+        showToast('Revert to pending proposal created!', 'success');
       } else {
-        showToast('Failed to revert app to pending', 'error');
+        showToast('Failed to create revert proposal', 'error');
       }
     } catch (error) {
-      console.error('Error reverting app to pending:', error);
-      showToast('Error reverting app to pending', 'error');
+      console.error('Error creating revert proposal:', error);
+      showToast('Error creating revert proposal', 'error');
     } finally {
       setProcessingApp(null);
+    }
+  };
+
+  // Approve a pending multisig proposal
+  const handleApproveProposal = async (sequenceNumber: number) => {
+    if (!userIsAdmin || !account || !signTransaction) return;
+
+    setProcessingProposal(sequenceNumber);
+    try {
+      const success = await approveMultisigTransaction(account, signTransaction, sequenceNumber);
+      if (success) {
+        await loadData();
+        showToast('Proposal approved!', 'success');
+      } else {
+        showToast('Failed to approve proposal', 'error');
+      }
+    } catch (error) {
+      console.error('Error approving proposal:', error);
+      showToast('Error approving proposal', 'error');
+    } finally {
+      setProcessingProposal(null);
+    }
+  };
+
+  // Reject a pending multisig proposal
+  const handleRejectProposal = async (sequenceNumber: number) => {
+    if (!userIsAdmin || !account || !signTransaction) return;
+
+    setProcessingProposal(sequenceNumber);
+    try {
+      const success = await rejectMultisigTransaction(account, signTransaction, sequenceNumber);
+      if (success) {
+        await loadData();
+        showToast('Proposal rejected!', 'success');
+      } else {
+        showToast('Failed to reject proposal', 'error');
+      }
+    } catch (error) {
+      console.error('Error rejecting proposal:', error);
+      showToast('Error rejecting proposal', 'error');
+    } finally {
+      setProcessingProposal(null);
+    }
+  };
+
+  // Execute an approved multisig proposal
+  const handleExecuteProposal = async (sequenceNumber: number) => {
+    if (!userIsAdmin || !account || !signTransaction) return;
+
+    setProcessingProposal(sequenceNumber);
+    try {
+      await executeMultisigTransaction(account, signTransaction, sequenceNumber);
+      await loadData();
+      showToast('Proposal executed successfully!', 'success');
+    } catch (error: any) {
+      console.error('Error executing proposal:', error);
+      const errorMsg = error?.message || 'Error executing proposal';
+      showToast(errorMsg, 'error');
+    } finally {
+      setProcessingProposal(null);
     }
   };
 
@@ -250,6 +380,7 @@ export default function Dashboard() {
   console.log(`Active tab: ${activeTab}, Total apps: ${apps.length}, Filtered: ${filteredApps.length}`);
 
   const tabs: { key: TabType; label: string; count?: number }[] = [
+    { key: 'proposals', label: 'Proposals', count: multisigProposals.length },
     { key: 'all', label: 'All Apps', count: stats.total },
     { key: 'pending', label: 'Pending', count: stats.pending },
     { key: 'approved', label: 'Approved', count: stats.approved },
@@ -269,7 +400,7 @@ export default function Dashboard() {
                 Movement Publishing Admin
               </h1>
               <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-                Manage mini app submissions and approvals
+                Multisig governance for mini app submissions
               </p>
             </div>
             <div className="flex items-center gap-3">
@@ -300,22 +431,50 @@ export default function Dashboard() {
               </p>
             </div>
           </div>
+        ) : !isVerified ? (
+          <div className="text-center py-20">
+            <div className="text-6xl mb-4">✍️</div>
+            <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2">
+              Verify Your Wallet
+            </h2>
+            <p className="text-gray-600 dark:text-gray-400 mb-4">
+              Click &quot;Verify Wallet&quot; above and sign the message to prove ownership.
+            </p>
+          </div>
         ) : checkingAdmin ? (
           <div className="text-center py-20">
             <div className="animate-spin text-4xl mb-4">⏳</div>
             <p className="text-gray-600 dark:text-gray-400">Checking admin status...</p>
           </div>
-        ) : !userIsAdmin ? (
+        ) : adminCheckError ? (
           <div className="text-center py-20">
             <div className="text-6xl mb-4">⚠️</div>
             <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2">
-              Unauthorized Access
+              Connection Error
+            </h2>
+            <p className="text-gray-600 dark:text-gray-400 mb-4">
+              Failed to verify admin status. Please check your configuration.
+            </p>
+            <div className="max-w-lg mx-auto p-4 bg-red-50 dark:bg-red-950 border border-red-200 dark:border-red-800 rounded-lg text-left">
+              <p className="text-sm text-red-700 dark:text-red-300 font-mono break-all">
+                {adminCheckError}
+              </p>
+            </div>
+          </div>
+        ) : !userIsAdmin ? (
+          <div className="text-center py-20">
+            <div className="text-6xl mb-4">🔐</div>
+            <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2">
+              Not a Multisig Signer
             </h2>
             <p className="text-gray-600 dark:text-gray-400 mb-2">
-              Your wallet address is not authorized as an admin.
+              Your wallet is not a signer of the admin multisig.
             </p>
-            <p className="text-sm text-gray-500 dark:text-gray-500 font-mono">
-              {account.address}
+            <p className="text-sm text-gray-500 dark:text-gray-500 font-mono mb-4">
+              {account.address.toString()}
+            </p>
+            <p className="text-xs text-gray-400 dark:text-gray-500">
+              Contact an existing multisig signer to be added.
             </p>
           </div>
         ) : (
@@ -324,7 +483,7 @@ export default function Dashboard() {
             <AdminManagement
               account={account}
               signTransaction={signTransaction}
-              currentUserAddress={account.address}
+              currentUserAddress={account.address.toString()}
               isAdmin={userIsAdmin}
             />
 
@@ -336,7 +495,8 @@ export default function Dashboard() {
             />
 
             {/* Stats */}
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+            <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-8">
+              <StatCard label="Proposals" value={multisigProposals.length} icon="📋" color="blue" />
               <StatCard label="Total Apps" value={stats.total} icon="📱" />
               <StatCard label="Pending Review" value={stats.pending} icon="⏳" color="orange" />
               <StatCard label="Approved" value={stats.approved} icon="✅" color="green" />
@@ -374,12 +534,58 @@ export default function Dashboard() {
               </nav>
             </div>
 
-            {/* Apps Grid */}
+            {/* Content based on active tab */}
             {loading ? (
               <div className="text-center py-20">
                 <div className="animate-spin text-4xl mb-4">⏳</div>
-                <p className="text-gray-600 dark:text-gray-400">Loading apps...</p>
+                <p className="text-gray-600 dark:text-gray-400">Loading...</p>
               </div>
+            ) : activeTab === 'proposals' ? (
+              /* Multisig Proposals Tab */
+              multisigProposals.length === 0 ? (
+                <div className="text-center py-20">
+                  <div className="text-6xl mb-4">📋</div>
+                  <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-2">
+                    No pending proposals
+                  </h3>
+                  <p className="text-gray-600 dark:text-gray-400">
+                    Create proposals by reviewing apps in the other tabs
+                  </p>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {/* Multisig Info Banner */}
+                  <div className="bg-blue-50 dark:bg-blue-950 border border-blue-200 dark:border-blue-800 rounded-lg p-4 mb-6">
+                    <div className="flex items-center gap-4">
+                      <div className="text-3xl">🔐</div>
+                      <div>
+                        <h3 className="font-semibold text-blue-900 dark:text-blue-100">
+                          Multisig Governance
+                        </h3>
+                        <p className="text-sm text-blue-700 dark:text-blue-300">
+                          {multisigThreshold} of {multisigOwners.length} signatures required to execute proposals
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Proposals List */}
+                  <div className="grid grid-cols-1 gap-4">
+                    {multisigProposals.map((proposal) => (
+                      <ProposalCard
+                        key={proposal.sequence_number}
+                        proposal={proposal}
+                        threshold={multisigThreshold}
+                        currentUserAddress={account?.address?.toString() || ''}
+                        onApprove={() => handleApproveProposal(Number(proposal.sequence_number))}
+                        onReject={() => handleRejectProposal(Number(proposal.sequence_number))}
+                        onExecute={() => handleExecuteProposal(Number(proposal.sequence_number))}
+                        isProcessing={processingProposal === Number(proposal.sequence_number)}
+                      />
+                    ))}
+                  </div>
+                </div>
+              )
             ) : filteredApps.length === 0 ? (
               <div className="text-center py-20">
                 <div className="text-6xl mb-4">📭</div>
@@ -395,6 +601,7 @@ export default function Dashboard() {
                 </p>
               </div>
             ) : (
+              /* Apps Grid */
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 {filteredApps.map((app) => (
                   <AppCard
@@ -464,6 +671,126 @@ function StatCard({
           <p className="text-3xl font-bold">{value}</p>
         </div>
         <div className="text-3xl opacity-70">{icon}</div>
+      </div>
+    </div>
+  );
+}
+
+// Proposal Card Component for Multisig Proposals
+function ProposalCard({
+  proposal,
+  threshold,
+  currentUserAddress,
+  onApprove,
+  onReject,
+  onExecute,
+  isProcessing,
+}: {
+  proposal: MultisigTransaction;
+  threshold: number;
+  currentUserAddress: string;
+  onApprove: () => void;
+  onReject: () => void;
+  onExecute: () => void;
+  isProcessing: boolean;
+}) {
+  const yesVotes = proposal.yesVotes?.length || 0;
+  const noVotes = proposal.noVotes?.length || 0;
+  const canExecute = yesVotes >= threshold;
+
+  // Use decoded action info if available, otherwise show generic
+  const actionInfo = proposal.decodedAction
+    ? { label: proposal.decodedAction.label, icon: proposal.decodedAction.icon }
+    : { label: 'Pending Transaction', icon: '📋' };
+
+  // Check if current user has already voted
+  const normalizeAddr = (addr: string) => addr.toLowerCase().replace(/^0x0*/, '0x');
+  const normalizedCurrentUser = normalizeAddr(currentUserAddress);
+  const hasVotedYes = proposal.yesVotes?.some(v => normalizeAddr(v) === normalizedCurrentUser) || false;
+  const hasVotedNo = proposal.noVotes?.some(v => normalizeAddr(v) === normalizedCurrentUser) || false;
+  const hasVoted = hasVotedYes || hasVotedNo;
+
+  return (
+    <div className="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-800 p-5">
+      <div className="flex items-start justify-between mb-4">
+        <div className="flex items-center gap-3">
+          <div className="text-3xl">{actionInfo.icon}</div>
+          <div>
+            <h3 className="text-lg font-bold text-gray-900 dark:text-white">
+              {actionInfo.label}
+            </h3>
+            <p className="text-sm text-gray-600 dark:text-gray-400">
+              Proposal #{proposal.sequence_number}
+            </p>
+          </div>
+        </div>
+        <div className={`px-3 py-1 rounded-full text-xs font-semibold ${
+          canExecute
+            ? 'bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-300'
+            : 'bg-yellow-100 dark:bg-yellow-900 text-yellow-700 dark:text-yellow-300'
+        }`}>
+          {canExecute ? 'Ready to Execute' : `${yesVotes}/${threshold} Approvals`}
+        </div>
+      </div>
+
+      {/* Votes */}
+      <div className="mb-4">
+        <div className="flex items-center gap-4 text-sm">
+          <span className="text-green-600 dark:text-green-400">
+            ✓ {yesVotes} approved
+          </span>
+          <span className="text-red-600 dark:text-red-400">
+            ✗ {noVotes} rejected
+          </span>
+        </div>
+        {/* Progress bar */}
+        <div className="mt-2 h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+          <div
+            className="h-full bg-green-500 transition-all"
+            style={{ width: `${Math.min((yesVotes / threshold) * 100, 100)}%` }}
+          />
+        </div>
+      </div>
+
+      {/* Creator and time */}
+      <div className="text-xs text-gray-500 dark:text-gray-400 mb-4">
+        <p>Created by: {proposal.creator?.slice(0, 8)}...{proposal.creator?.slice(-6)}</p>
+        <p>Created: {new Date(Number(proposal.creation_time_secs) * 1000).toLocaleString()}</p>
+      </div>
+
+      {/* Actions */}
+      <div className="flex gap-2 pt-4 border-t border-gray-200 dark:border-gray-700">
+        {hasVoted ? (
+          <div className="flex-1 text-center py-2 text-sm text-gray-500 dark:text-gray-400">
+            {hasVotedYes ? '✓ You approved this proposal' : '✗ You rejected this proposal'}
+          </div>
+        ) : (
+          <>
+            <button
+              onClick={onReject}
+              disabled={isProcessing}
+              className="flex-1 px-4 py-2 bg-red-100 dark:bg-red-900/30 hover:bg-red-200 dark:hover:bg-red-900/50 text-red-700 dark:text-red-300 text-sm font-medium rounded-lg transition-colors disabled:opacity-50"
+            >
+              {isProcessing ? 'Processing...' : 'Reject'}
+            </button>
+            <button
+              onClick={onApprove}
+              disabled={isProcessing}
+              className="flex-1 px-4 py-2 bg-green-100 dark:bg-green-900/30 hover:bg-green-200 dark:hover:bg-green-900/50 text-green-700 dark:text-green-300 text-sm font-medium rounded-lg transition-colors disabled:opacity-50"
+            >
+              {isProcessing ? 'Processing...' : 'Approve'}
+            </button>
+          </>
+        )}
+        {canExecute && (
+          <button
+            onClick={onExecute}
+            disabled={isProcessing}
+            className="flex-1 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors disabled:opacity-50"
+          >
+            {isProcessing ? 'Executing...' : 'Execute'}
+          </button>
+        )}
       </div>
     </div>
   );
