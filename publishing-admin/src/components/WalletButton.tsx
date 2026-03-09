@@ -1,14 +1,19 @@
 'use client';
 
-import { useWallet } from '@aptos-labs/wallet-adapter-react';
+import { useWallet } from '@moveindustries/wallet-adapter-react';
 import { useEffect, useState } from 'react';
-import { checkIsOwner } from '@/lib/aptos';
+import { isMultisigSigner } from '@/lib/aptos';
+
+// Session storage key for verified addresses
+const VERIFIED_KEY = 'wallet_verified';
 
 export function WalletButton() {
-  const { account, connected, disconnect, wallet } = useWallet();
+  const { account, connected, disconnect, wallet, signMessage } = useWallet();
   const [walletName, setWalletName] = useState<string>('');
   const [showWalletModal, setShowWalletModal] = useState(false);
   const [userIsAdmin, setUserIsAdmin] = useState<boolean | null>(null);
+  const [isVerified, setIsVerified] = useState(false);
+  const [isVerifying, setIsVerifying] = useState(false);
 
   useEffect(() => {
     if (wallet?.name) {
@@ -16,24 +21,71 @@ export function WalletButton() {
     }
   }, [wallet]);
 
+  // Check if this address was already verified in this session
+  useEffect(() => {
+    if (account?.address) {
+      const addressStr = account.address.toString();
+      const verified = sessionStorage.getItem(VERIFIED_KEY);
+      if (verified === addressStr) {
+        setIsVerified(true);
+      } else {
+        setIsVerified(false);
+      }
+    } else {
+      setIsVerified(false);
+    }
+  }, [account?.address]);
+
+  // Check admin status only after verification
   useEffect(() => {
     const checkAdmin = async () => {
-      if (!account?.address) {
+      if (!account?.address || !isVerified) {
         setUserIsAdmin(null);
         return;
       }
       try {
-        const isOwner = await checkIsOwner(account.address);
-        setUserIsAdmin(isOwner);
+        const isSigner = await isMultisigSigner(account.address.toString());
+        setUserIsAdmin(isSigner);
       } catch {
-        setUserIsAdmin(false);
+        setUserIsAdmin(null);
       }
     };
     checkAdmin();
-  }, [account?.address]);
+  }, [account?.address, isVerified]);
 
-  const shortAddress = account?.address
-    ? `${account.address.slice(0, 6)}...${account.address.slice(-4)}`
+  const handleVerify = async () => {
+    if (!account?.address || !signMessage) return;
+
+    const addressStr = account.address.toString();
+    setIsVerifying(true);
+    try {
+      const message = `Sign this message to verify ownership of your wallet for Movement Publishing Admin.\n\nAddress: ${addressStr}\nTimestamp: ${Date.now()}`;
+
+      const response = await signMessage({ message, nonce: Date.now().toString() });
+
+      if (response) {
+        // Signature verified - store in session
+        sessionStorage.setItem(VERIFIED_KEY, addressStr);
+        setIsVerified(true);
+        // Notify other components
+        window.dispatchEvent(new CustomEvent('wallet-verified', { detail: addressStr }));
+      }
+    } catch (error) {
+      console.error('Signature verification failed:', error);
+    } finally {
+      setIsVerifying(false);
+    }
+  };
+
+  const handleDisconnect = () => {
+    sessionStorage.removeItem(VERIFIED_KEY);
+    setIsVerified(false);
+    disconnect();
+  };
+
+  const addressStr = account?.address?.toString() || '';
+  const shortAddress = addressStr
+    ? `${addressStr.slice(0, 6)}...${addressStr.slice(-4)}`
     : '';
 
   if (!connected) {
@@ -53,11 +105,37 @@ export function WalletButton() {
     );
   }
 
+  // Connected but not verified - show verify button
+  if (!isVerified) {
+    return (
+      <div className="flex items-center gap-3">
+        <button
+          onClick={handleVerify}
+          disabled={isVerifying}
+          className="bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded-lg font-medium transition-colors disabled:opacity-50"
+        >
+          {isVerifying ? 'Signing...' : 'Verify Wallet'}
+        </button>
+        <button
+          onClick={handleDisconnect}
+          className="text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 text-sm font-medium"
+        >
+          Disconnect
+        </button>
+      </div>
+    );
+  }
+
   return (
     <div className="flex items-center gap-3">
       {userIsAdmin === false && (
         <span className="text-red-600 dark:text-red-400 text-sm font-medium">
-          ⚠️ Not Admin
+          Not Signer
+        </span>
+      )}
+      {userIsAdmin === true && (
+        <span className="text-green-600 dark:text-green-400 text-sm font-medium">
+          ✓ Signer
         </span>
       )}
       <div className="bg-gray-100 dark:bg-gray-800 px-4 py-2 rounded-lg">
@@ -67,7 +145,7 @@ export function WalletButton() {
         </div>
       </div>
       <button
-        onClick={disconnect}
+        onClick={handleDisconnect}
         className="text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 text-sm font-medium"
       >
         Disconnect
@@ -151,7 +229,7 @@ function WalletModal({ onClose }: { onClose: () => void }) {
         </div>
 
         <p className="text-xs text-gray-500 dark:text-gray-400 mt-4 text-center">
-          Only admin wallets can manage app submissions
+          You will need to sign a message to verify wallet ownership
         </p>
       </div>
     </div>

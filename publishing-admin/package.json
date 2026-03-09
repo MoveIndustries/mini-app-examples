@@ -9,11 +9,8 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "@aptos-labs/ts-sdk": "^1.28.0",
-    "@aptos-labs/wallet-adapter-react": "^3.7.1",
-    "@martianwallet/aptos-wallet-adapter": "^0.0.5",
-    "@pontem/wallet-adapter-plugin": "^0.2.1",
-    "petra-plugin-wallet-adapter": "^0.4.5",
+    "@moveindustries/ts-sdk": "^5.1.6",
+    "@moveindustries/wallet-adapter-react": "^7.4.1",
     "next": "15.5.9",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",

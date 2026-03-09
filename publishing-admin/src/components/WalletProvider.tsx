@@ -1,19 +1,16 @@
 'use client';
 
-import { AptosWalletAdapterProvider } from '@aptos-labs/wallet-adapter-react';
+import { MovementWalletAdapterProvider } from '@moveindustries/wallet-adapter-react';
 
 export function WalletProvider({ children }: { children: React.ReactNode }) {
-
   return (
-    <AptosWalletAdapterProvider
-      plugins={[]}
+    <MovementWalletAdapterProvider
       autoConnect={true}
-      optInWallets={[]}
       onError={(error) => {
         console.error('Wallet error:', error);
       }}
     >
       {children}
-    </AptosWalletAdapterProvider>
+    </MovementWalletAdapterProvider>
   );
 }

@@ -221,7 +221,7 @@ export function AppCard({
             onClick={(e) => e.stopPropagation()}
           >
             <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100 mb-4">
-              Propose Rejection
+              Propose Reject
             </h3>
             <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
               Provide a reason for proposing rejection of <strong>{app.name}</strong>:
@@ -601,7 +601,7 @@ function AppDetailsModal({
                       disabled={!rejectReason.trim() || isProcessing || !onReject}
                       className="flex-1 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                      {isProcessing ? 'Creating Proposal...' : 'Create Rejection Proposal'}
+                      {isProcessing ? 'Processing...' : 'Propose Reject'}
                     </button>
                   </div>
                 </div>
@@ -613,7 +613,7 @@ function AppDetailsModal({
                       disabled={isProcessing}
                       className="flex-1 px-4 py-2 bg-red-600 hover:bg-red-700 text-white text-sm font-medium rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                      Propose Rejection
+                      Propose Reject
                     </button>
                   )}
                   <button

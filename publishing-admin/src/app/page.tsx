@@ -8,7 +8,6 @@ import { TreasuryManagement } from '@/components/TreasuryManagement';
 import { WalletButton } from '@/components/WalletButton';
 import {
   approveMultisigTransaction,
-  canExecuteMultisigTransaction,
   executeMultisigTransaction,
   getAllApps,
   getMultisigOwners,
@@ -27,7 +26,7 @@ import {
   rejectMultisigTransaction,
 } from '@/lib/aptos';
 import { AppMetadata, AppStatus } from '@/types/app';
-import { useWallet } from '@aptos-labs/wallet-adapter-react';
+import { useWallet } from '@moveindustries/wallet-adapter-react';
 import { useEffect, useState } from 'react';
 
 type TabType = 'all' | 'pending' | 'approved' | 'rejected' | 'updates' | 'proposals';
@@ -48,18 +47,42 @@ export default function Dashboard() {
   const [multisigThreshold, setMultisigThreshold] = useState(0);
   const [multisigOwners, setMultisigOwners] = useState<string[]>([]);
   const [processingProposal, setProcessingProposal] = useState<number | null>(null);
+  const [adminCheckError, setAdminCheckError] = useState<string | null>(null);
+  const [isVerified, setIsVerified] = useState(false);
 
-  // Check if connected wallet is a multisig signer
+  // Check verification status from session storage
+  useEffect(() => {
+    const checkVerification = () => {
+      if (account?.address) {
+        const verified = sessionStorage.getItem('wallet_verified');
+        const addressStr = account.address.toString();
+        setIsVerified(verified === addressStr);
+      } else {
+        setIsVerified(false);
+      }
+    };
+
+    checkVerification();
+
+    // Listen for verification events from WalletButton
+    const handleVerified = () => checkVerification();
+    window.addEventListener('wallet-verified', handleVerified);
+    return () => window.removeEventListener('wallet-verified', handleVerified);
+  }, [account?.address]);
+
+  // Check if connected wallet is a multisig signer (only after verification)
   useEffect(() => {
     const checkAdminStatus = async () => {
-      if (!account?.address) {
+      if (!account?.address || !isVerified) {
         setUserIsAdmin(false);
         setCheckingAdmin(false);
+        setAdminCheckError(null);
         return;
       }
       setCheckingAdmin(true);
+      setAdminCheckError(null);
       try {
-        const isSigner = await isMultisigSigner(account.address);
+        const isSigner = await isMultisigSigner(account.address.toString());
         setUserIsAdmin(isSigner);
         if (isSigner) {
           // Also fetch multisig info
@@ -73,12 +96,13 @@ export default function Dashboard() {
       } catch (error) {
         console.error('Error checking admin status:', error);
         setUserIsAdmin(false);
+        setAdminCheckError(error instanceof Error ? error.message : 'Failed to check admin status');
       } finally {
         setCheckingAdmin(false);
       }
     };
     checkAdminStatus();
-  }, [account?.address]);
+  }, [account?.address, isVerified]);
 
   useEffect(() => {
     // Only load data if user is logged in AND is an admin
@@ -102,7 +126,7 @@ export default function Dashboard() {
     setLoading(true);
     try {
       const [allApps, registryStats, proposals] = await Promise.all([
-        getAllApps(account.address),
+        getAllApps(account.address.toString()),
         getStats(),
         getPendingMultisigTransactions(),
       ]);
@@ -122,7 +146,23 @@ export default function Dashboard() {
 
       setApps(allApps);
       setStats(registryStats);
-      setMultisigProposals(proposals);
+
+      // Enrich proposals with app names from loaded apps
+      const enrichedProposals = proposals.map(proposal => {
+        if (proposal.decodedAction?.appId !== undefined) {
+          // Compare as strings since app_id from chain is a string
+          const appIdStr = String(proposal.decodedAction.appId);
+          const app = allApps.find(a => String(a.app_id) === appIdStr);
+          if (app) {
+            proposal.decodedAction = {
+              ...proposal.decodedAction,
+              label: `${proposal.decodedAction.label.replace(/#\d+$/, '')} "${app.name}"`,
+            };
+          }
+        }
+        return proposal;
+      });
+      setMultisigProposals(enrichedProposals);
 
       // Check for pending updates and fetch change details
       const updates = new Set<number>();
@@ -298,21 +338,18 @@ export default function Dashboard() {
   };
 
   // Execute an approved multisig proposal
-  const handleExecuteProposal = async () => {
+  const handleExecuteProposal = async (sequenceNumber: number) => {
     if (!userIsAdmin || !account || !signTransaction) return;
 
-    setProcessingProposal(-1); // Use -1 to indicate execution in progress
+    setProcessingProposal(sequenceNumber);
     try {
-      const success = await executeMultisigTransaction(account, signTransaction);
-      if (success) {
-        await loadData();
-        showToast('Proposal executed successfully!', 'success');
-      } else {
-        showToast('Failed to execute proposal', 'error');
-      }
-    } catch (error) {
+      await executeMultisigTransaction(account, signTransaction, sequenceNumber);
+      await loadData();
+      showToast('Proposal executed successfully!', 'success');
+    } catch (error: any) {
       console.error('Error executing proposal:', error);
-      showToast('Error executing proposal', 'error');
+      const errorMsg = error?.message || 'Error executing proposal';
+      showToast(errorMsg, 'error');
     } finally {
       setProcessingProposal(null);
     }
@@ -394,10 +431,35 @@ export default function Dashboard() {
               </p>
             </div>
           </div>
+        ) : !isVerified ? (
+          <div className="text-center py-20">
+            <div className="text-6xl mb-4">✍️</div>
+            <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2">
+              Verify Your Wallet
+            </h2>
+            <p className="text-gray-600 dark:text-gray-400 mb-4">
+              Click &quot;Verify Wallet&quot; above and sign the message to prove ownership.
+            </p>
+          </div>
         ) : checkingAdmin ? (
           <div className="text-center py-20">
             <div className="animate-spin text-4xl mb-4">⏳</div>
             <p className="text-gray-600 dark:text-gray-400">Checking admin status...</p>
+          </div>
+        ) : adminCheckError ? (
+          <div className="text-center py-20">
+            <div className="text-6xl mb-4">⚠️</div>
+            <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2">
+              Connection Error
+            </h2>
+            <p className="text-gray-600 dark:text-gray-400 mb-4">
+              Failed to verify admin status. Please check your configuration.
+            </p>
+            <div className="max-w-lg mx-auto p-4 bg-red-50 dark:bg-red-950 border border-red-200 dark:border-red-800 rounded-lg text-left">
+              <p className="text-sm text-red-700 dark:text-red-300 font-mono break-all">
+                {adminCheckError}
+              </p>
+            </div>
           </div>
         ) : !userIsAdmin ? (
           <div className="text-center py-20">
@@ -409,7 +471,7 @@ export default function Dashboard() {
               Your wallet is not a signer of the admin multisig.
             </p>
             <p className="text-sm text-gray-500 dark:text-gray-500 font-mono mb-4">
-              {account.address}
+              {account.address.toString()}
             </p>
             <p className="text-xs text-gray-400 dark:text-gray-500">
               Contact an existing multisig signer to be added.
@@ -421,7 +483,7 @@ export default function Dashboard() {
             <AdminManagement
               account={account}
               signTransaction={signTransaction}
-              currentUserAddress={account.address}
+              currentUserAddress={account.address.toString()}
               isAdmin={userIsAdmin}
             />
 
@@ -514,11 +576,11 @@ export default function Dashboard() {
                         key={proposal.sequence_number}
                         proposal={proposal}
                         threshold={multisigThreshold}
-                        currentUserAddress={account?.address || ''}
+                        currentUserAddress={account?.address?.toString() || ''}
                         onApprove={() => handleApproveProposal(Number(proposal.sequence_number))}
                         onReject={() => handleRejectProposal(Number(proposal.sequence_number))}
-                        onExecute={handleExecuteProposal}
-                        isProcessing={processingProposal === Number(proposal.sequence_number) || processingProposal === -1}
+                        onExecute={() => handleExecuteProposal(Number(proposal.sequence_number))}
+                        isProcessing={processingProposal === Number(proposal.sequence_number)}
                       />
                     ))}
                   </div>
@@ -632,36 +694,20 @@ function ProposalCard({
   onExecute: () => void;
   isProcessing: boolean;
 }) {
-  const yesVotes = proposal.votes?.yes?.length || 0;
-  const noVotes = proposal.votes?.no?.length || 0;
+  const yesVotes = proposal.yesVotes?.length || 0;
+  const noVotes = proposal.noVotes?.length || 0;
   const canExecute = yesVotes >= threshold;
 
-  // Parse the function name from the payload
-  const functionName = proposal.payload?.function || 'Unknown Function';
-  const functionParts = functionName.split('::');
-  const shortFunctionName = functionParts.length >= 3 ? functionParts[2] : functionName;
-
-  // Determine action type for display
-  const getActionLabel = (funcName: string) => {
-    if (funcName.includes('approve_app')) return { label: 'Approve App', color: 'green', icon: '✅' };
-    if (funcName.includes('reject_app')) return { label: 'Reject App', color: 'red', icon: '❌' };
-    if (funcName.includes('approve_update')) return { label: 'Approve Update', color: 'blue', icon: '🔄' };
-    if (funcName.includes('approve_rejected')) return { label: 'Approve Rejected App', color: 'green', icon: '♻️' };
-    if (funcName.includes('revert_to_pending')) return { label: 'Revert to Pending', color: 'orange', icon: '⏪' };
-    if (funcName.includes('add_owner')) return { label: 'Add Admin', color: 'purple', icon: '👤' };
-    if (funcName.includes('remove_owner')) return { label: 'Remove Admin', color: 'red', icon: '🚫' };
-    if (funcName.includes('update_treasury')) return { label: 'Update Treasury', color: 'yellow', icon: '💰' };
-    if (funcName.includes('update_submit_fee')) return { label: 'Update Fee', color: 'yellow', icon: '💵' };
-    return { label: shortFunctionName, color: 'gray', icon: '📝' };
-  };
-
-  const actionInfo = getActionLabel(functionName);
+  // Use decoded action info if available, otherwise show generic
+  const actionInfo = proposal.decodedAction
+    ? { label: proposal.decodedAction.label, icon: proposal.decodedAction.icon }
+    : { label: 'Pending Transaction', icon: '📋' };
 
   // Check if current user has already voted
   const normalizeAddr = (addr: string) => addr.toLowerCase().replace(/^0x0*/, '0x');
   const normalizedCurrentUser = normalizeAddr(currentUserAddress);
-  const hasVotedYes = proposal.votes?.yes?.some(v => normalizeAddr(v) === normalizedCurrentUser) || false;
-  const hasVotedNo = proposal.votes?.no?.some(v => normalizeAddr(v) === normalizedCurrentUser) || false;
+  const hasVotedYes = proposal.yesVotes?.some(v => normalizeAddr(v) === normalizedCurrentUser) || false;
+  const hasVotedNo = proposal.noVotes?.some(v => normalizeAddr(v) === normalizedCurrentUser) || false;
   const hasVoted = hasVotedYes || hasVotedNo;
 
   return (
@@ -686,20 +732,6 @@ function ProposalCard({
           {canExecute ? 'Ready to Execute' : `${yesVotes}/${threshold} Approvals`}
         </div>
       </div>
-
-      {/* Arguments */}
-      {proposal.payload?.arguments && proposal.payload.arguments.length > 0 && (
-        <div className="mb-4 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
-          <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 mb-2">Arguments:</p>
-          <div className="space-y-1">
-            {proposal.payload.arguments.map((arg, i) => (
-              <code key={i} className="block text-xs text-gray-700 dark:text-gray-300 font-mono break-all">
-                {arg}
-              </code>
-            ))}
-          </div>
-        </div>
-      )}
 
       {/* Votes */}
       <div className="mb-4">

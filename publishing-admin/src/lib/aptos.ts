@@ -1,34 +1,164 @@
 import {
-  Aptos,
-  AptosConfig,
+  Movement,
+  MovementConfig,
   Network,
   generateTransactionPayload,
-} from '@aptos-labs/ts-sdk';
+  AccountAddress,
+  RawTransaction,
+  TransactionPayloadMultiSig,
+  MultiSig,
+  ChainId,
+  SignedTransaction,
+  Deserializer,
+} from '@moveindustries/ts-sdk';
 import { REGISTRY_ADDRESS, MULTISIG_ADDRESS } from './config';
 import { AppMetadata, PendingChange } from '@/types/app';
 
-// Multisig transaction interface
+// Multisig transaction interface (matches Move struct)
 export interface MultisigTransaction {
   sequence_number: string;
-  payload: {
-    function: string;
-    type_arguments: string[];
-    arguments: string[];
-  };
-  payload_hash: string;
-  votes: {
-    yes: string[];
-    no: string[];
-  };
+  payload: any; // Option<vector<u8>> - raw bytes or null
+  payload_hash: any; // Option<vector<u8>>
+  votes: { data: Array<{ key: string; value: boolean }> }; // SimpleMap<address, bool>
   creator: string;
   creation_time_secs: string;
+  // Computed fields we add
+  yesVotes?: string[];
+  noVotes?: string[];
+  // Decoded payload info
+  decodedAction?: {
+    functionName: string;
+    appId?: number;
+    label: string;
+    icon: string;
+  };
+}
+
+// Decode the BCS payload to extract action info
+export function decodeMultisigPayload(payload: any): MultisigTransaction['decodedAction'] {
+  try {
+    console.log('Decoding payload:', payload);
+
+    if (!payload) {
+      console.log('No payload');
+      return undefined;
+    }
+
+    // Handle different payload formats
+    let bytes: number[] | undefined;
+
+    // Format 1: { vec: [hexString] } (Option<vector<u8>> returned as hex)
+    if (payload.vec && Array.isArray(payload.vec) && payload.vec.length > 0) {
+      const innerValue = payload.vec[0];
+      if (typeof innerValue === 'string') {
+        // It's a hex string
+        const hex = innerValue.startsWith('0x') ? innerValue.slice(2) : innerValue;
+        bytes = [];
+        for (let i = 0; i < hex.length; i += 2) {
+          bytes.push(parseInt(hex.substring(i, i + 2), 16));
+        }
+      } else if (Array.isArray(innerValue)) {
+        // It's already a byte array
+        bytes = innerValue;
+      }
+    }
+    // Format 2: Direct array
+    else if (Array.isArray(payload)) {
+      bytes = payload;
+    }
+    // Format 3: Hex string directly
+    else if (typeof payload === 'string') {
+      const hex = payload.startsWith('0x') ? payload.slice(2) : payload;
+      bytes = [];
+      for (let i = 0; i < hex.length; i += 2) {
+        bytes.push(parseInt(hex.substring(i, i + 2), 16));
+      }
+    }
+
+    if (!bytes || bytes.length === 0) {
+      console.log('No bytes found in payload');
+      return undefined;
+    }
+
+    console.log('Payload bytes length:', bytes.length);
+
+    // Convert to Uint8Array for parsing
+    const data = new Uint8Array(bytes);
+
+    // Try to find function name in the bytes by looking for known patterns
+    // The function name is a BCS string (length-prefixed)
+    const textDecoder = new TextDecoder('utf-8', { fatal: false });
+    const text = textDecoder.decode(data);
+
+    console.log('Decoded text (partial):', text.substring(0, 200));
+
+    // Look for our known function names
+    const functionPatterns: { pattern: string; label: string; icon: string }[] = [
+      { pattern: 'approve_app', label: 'Approve App', icon: '✅' },
+      { pattern: 'reject_app', label: 'Reject App', icon: '❌' },
+      { pattern: 'revert_to_pending', label: 'Revert to Pending', icon: '↩️' },
+      { pattern: 'approve_update', label: 'Approve Update', icon: '🔄' },
+      { pattern: 'approve_rejected_app', label: 'Approve Rejected App', icon: '✅' },
+      { pattern: 'add_owner', label: 'Add Owner', icon: '👤' },
+      { pattern: 'remove_owner', label: 'Remove Owner', icon: '🚫' },
+      { pattern: 'update_treasury_address', label: 'Update Treasury', icon: '💰' },
+      { pattern: 'update_submit_fee', label: 'Update Submit Fee', icon: '💵' },
+    ];
+
+    for (const { pattern, label, icon } of functionPatterns) {
+      const patternIndex = text.indexOf(pattern);
+      if (patternIndex !== -1) {
+        console.log('Found pattern:', pattern, 'at index:', patternIndex);
+        // Try to extract app_id from the payload
+        let appId: number | undefined;
+
+        // For app-related functions, find the arguments section
+        // BCS format: after function name, there's type_args (usually empty vector = 0x00)
+        // then args vector, where first arg for app functions is u64 app_id
+        if (pattern.includes('app') || pattern === 'revert_to_pending' || pattern === 'approve_update') {
+          // Find position after the function name in bytes
+          const funcNameEnd = patternIndex + pattern.length;
+
+          // Look for the args section - it starts with vector lengths
+          // The first arg should be a vector containing the u64 app_id (8 bytes)
+          // Search for pattern: 0x00 (empty type args) followed by 0x01 or 0x02 (1-2 args)
+          // then 0x08 (8 bytes for u64)
+          for (let i = funcNameEnd; i < data.length - 10; i++) {
+            // Look for: type_args_len(0) + args_len(1+) + first_arg_len(8) + u64 bytes
+            if (data[i] === 0x00 && (data[i + 1] === 0x01 || data[i + 1] === 0x02) && data[i + 2] === 0x08) {
+              // Read u64 little-endian starting at i+3
+              appId = data[i + 3] |
+                     (data[i + 4] << 8) |
+                     (data[i + 5] << 16) |
+                     (data[i + 6] << 24);
+              console.log('Found app_id:', appId, 'at offset:', i + 3);
+              break;
+            }
+          }
+        }
+
+        return {
+          functionName: pattern,
+          appId,
+          label: appId !== undefined ? `${label} #${appId}` : label,
+          icon,
+        };
+      }
+    }
+
+    console.log('No known pattern found in payload');
+    return undefined;
+  } catch (error) {
+    console.error('Error decoding payload:', error);
+    return undefined;
+  }
 }
 
 // Lazy initialization to ensure env vars are loaded
-let aptosInstance: Aptos | null = null;
+let movementInstance: Movement | null = null;
 
-function getAptosClient(): Aptos {
-  if (!aptosInstance) {
+function getMovementClient(): Movement {
+  if (!movementInstance) {
     const fullnodeUrl = process.env.NEXT_PUBLIC_FULLNODE_URL;
     const indexerUrl = process.env.NEXT_PUBLIC_INDEXER_URL;
 
@@ -36,21 +166,21 @@ function getAptosClient(): Aptos {
       throw new Error('FULLNODE_URL and INDEXER_URL must be set in environment variables');
     }
 
-    const config = new AptosConfig({
+    const config = new MovementConfig({
       network: Network.CUSTOM,
       fullnode: fullnodeUrl,
       indexer: indexerUrl,
     });
 
-    aptosInstance = new Aptos(config);
+    movementInstance = new Movement(config);
   }
-  return aptosInstance;
+  return movementInstance;
 }
 
 // View functions
 export async function getApp(appId: number): Promise<AppMetadata | null> {
   try {
-    const aptos = getAptosClient();
+    const aptos = getMovementClient();
     console.log('Fetching app with ID:', appId);
     const result = await aptos.view({
       payload: {
@@ -70,7 +200,7 @@ export async function getApp(appId: number): Promise<AppMetadata | null> {
 
 export async function getStats(): Promise<{ total: number; approved: number; pending: number }> {
   try {
-    const aptos = getAptosClient();
+    const aptos = getMovementClient();
     console.log('Fetching stats from:', `${REGISTRY_ADDRESS}::app_registry::get_stats`);
     const result = await aptos.view({
       payload: {
@@ -94,7 +224,7 @@ export async function getStats(): Promise<{ total: number; approved: number; pen
 
 export async function hasPendingChange(appId: number): Promise<boolean> {
   try {
-    const aptos = getAptosClient();
+    const aptos = getMovementClient();
     const result = await aptos.view({
       payload: {
         function: `${REGISTRY_ADDRESS}::app_registry::has_pending_change`,
@@ -110,7 +240,7 @@ export async function hasPendingChange(appId: number): Promise<boolean> {
 
 export async function getPendingChange(appId: number): Promise<PendingChange | null> {
   try {
-    const aptos = getAptosClient();
+    const aptos = getMovementClient();
     const result = await aptos.view({
       payload: {
         function: `${REGISTRY_ADDRESS}::app_registry::get_pending_change`,
@@ -143,7 +273,7 @@ function normalizeAddress(address: string): string {
 export async function checkIsOwner(address: string): Promise<boolean> {
   try {
     console.log('checkIsOwner called with address:', address);
-    const aptos = getAptosClient();
+    const aptos = getMovementClient();
     const normalizedAddress = normalizeAddress(address);
     console.log('Normalized address:', normalizedAddress);
     const result = await aptos.view({
@@ -165,7 +295,7 @@ export async function checkIsOwner(address: string): Promise<boolean> {
 // Get list of multisig owners/signers
 export async function getMultisigOwners(): Promise<string[]> {
   try {
-    const aptos = getAptosClient();
+    const aptos = getMovementClient();
     console.log('Fetching multisig owners from:', MULTISIG_ADDRESS);
     const result = await aptos.view({
       payload: {
@@ -197,7 +327,7 @@ export async function isMultisigSigner(address: string): Promise<boolean> {
 // Get multisig threshold (signatures required)
 export async function getMultisigThreshold(): Promise<number> {
   try {
-    const aptos = getAptosClient();
+    const aptos = getMovementClient();
     const result = await aptos.view({
       payload: {
         function: `0x1::multisig_account::num_signatures_required`,
@@ -214,7 +344,7 @@ export async function getMultisigThreshold(): Promise<number> {
 // Get last resolved sequence number
 export async function getLastResolvedSequenceNumber(): Promise<number> {
   try {
-    const aptos = getAptosClient();
+    const aptos = getMovementClient();
     const result = await aptos.view({
       payload: {
         function: `0x1::multisig_account::last_resolved_sequence_number`,
@@ -231,7 +361,7 @@ export async function getLastResolvedSequenceNumber(): Promise<number> {
 // Get next sequence number
 export async function getNextSequenceNumber(): Promise<number> {
   try {
-    const aptos = getAptosClient();
+    const aptos = getMovementClient();
     const result = await aptos.view({
       payload: {
         function: `0x1::multisig_account::next_sequence_number`,
@@ -248,14 +378,41 @@ export async function getNextSequenceNumber(): Promise<number> {
 // Get a specific multisig transaction
 export async function getMultisigTransaction(sequenceNumber: number): Promise<MultisigTransaction | null> {
   try {
-    const aptos = getAptosClient();
+    const aptos = getMovementClient();
     const result = await aptos.view({
       payload: {
         function: `0x1::multisig_account::get_transaction`,
         functionArguments: [MULTISIG_ADDRESS, sequenceNumber],
       },
     });
-    return result[0] as MultisigTransaction;
+
+    const tx = result[0] as MultisigTransaction;
+
+    // Process votes from SimpleMap to yes/no arrays
+    const yesVotes: string[] = [];
+    const noVotes: string[] = [];
+
+    if (tx.votes?.data) {
+      for (const vote of tx.votes.data) {
+        if (vote.value === true) {
+          yesVotes.push(vote.key);
+        } else {
+          noVotes.push(vote.key);
+        }
+      }
+    }
+
+    tx.yesVotes = yesVotes;
+    tx.noVotes = noVotes;
+
+    // Decode the payload to get action info
+    console.log('Raw tx payload:', tx.payload);
+    console.log('Raw tx payload_hash:', tx.payload_hash);
+    tx.decodedAction = decodeMultisigPayload(tx.payload);
+
+    console.log('Fetched tx:', sequenceNumber, 'votes:', tx.votes, 'yesVotes:', yesVotes, 'noVotes:', noVotes, 'action:', tx.decodedAction);
+
+    return tx;
   } catch (error) {
     console.error('Error fetching multisig transaction:', error);
     return null;
@@ -286,7 +443,7 @@ export async function getPendingMultisigTransactions(): Promise<MultisigTransact
 // Check if a multisig transaction can be executed
 export async function canExecuteMultisigTransaction(sequenceNumber: number): Promise<boolean> {
   try {
-    const aptos = getAptosClient();
+    const aptos = getMovementClient();
     const result = await aptos.view({
       payload: {
         function: `0x1::multisig_account::can_be_executed`,
@@ -307,8 +464,8 @@ export async function hasVoted(sequenceNumber: number, address: string): Promise
     if (!tx) return false;
 
     const normalizedAddress = normalizeAddress(address);
-    const yesVoters = tx.votes.yes.map(a => normalizeAddress(a));
-    const noVoters = tx.votes.no.map(a => normalizeAddress(a));
+    const yesVoters = (tx.yesVotes || []).map((a: string) => normalizeAddress(a));
+    const noVoters = (tx.noVotes || []).map((a: string) => normalizeAddress(a));
 
     return yesVoters.includes(normalizedAddress) || noVoters.includes(normalizedAddress);
   } catch (error) {
@@ -319,7 +476,7 @@ export async function hasVoted(sequenceNumber: number, address: string): Promise
 
 export async function getOwners(): Promise<string[]> {
   try {
-    const aptos = getAptosClient();
+    const aptos = getMovementClient();
     console.log('Fetching owners from registry');
     const result = await aptos.view({
       payload: {
@@ -337,7 +494,7 @@ export async function getOwners(): Promise<string[]> {
 
 export async function getAllAppIds(): Promise<number[]> {
   try {
-    const aptos = getAptosClient();
+    const aptos = getMovementClient();
     console.log('Fetching all app indices');
     const result = await aptos.view({
       payload: {
@@ -355,7 +512,7 @@ export async function getAllAppIds(): Promise<number[]> {
 
 export async function getNonApprovedApps(): Promise<AppMetadata[]> {
   try {
-    const aptos = getAptosClient();
+    const aptos = getMovementClient();
     console.log('Fetching non-approved apps');
     const result = await aptos.view({
       payload: {
@@ -410,7 +567,7 @@ async function buildAndSubmitTransaction(
   functionArguments: any[]
 ): Promise<boolean> {
   try {
-    const aptos = getAptosClient();
+    const aptos = getMovementClient();
 
     // Build the transaction
     const transaction = await aptos.transaction.build.simple({
@@ -421,13 +578,13 @@ async function buildAndSubmitTransaction(
       },
     });
 
-    // Sign the transaction with the wallet
-    const senderAuthenticator = await signTransaction(transaction);
+    // Sign the transaction with the wallet (correct format for Movement adapter)
+    const signResult = await signTransaction({ transactionOrPayload: transaction });
 
     // Submit the signed transaction
     const committedTransaction = await aptos.transaction.submit.simple({
       transaction,
-      senderAuthenticator,
+      senderAuthenticator: signResult.authenticator,
     });
 
     // Wait for transaction confirmation
@@ -454,7 +611,7 @@ export async function createMultisigProposal(
   functionArguments: any[]
 ): Promise<boolean> {
   try {
-    const aptos = getAptosClient();
+    const movement = getMovementClient();
 
     // Step 1: Generate the transaction payload that will be executed by the multisig
     // Using multisigAddress parameter creates a TransactionPayloadMultiSig
@@ -462,18 +619,18 @@ export async function createMultisigProposal(
       multisigAddress: MULTISIG_ADDRESS,
       function: functionName,
       functionArguments: functionArguments,
-      aptosConfig: aptos.config,
-    });
+      movementConfig: movement.config,
+    } as any);
 
     // Step 2: Extract the BCS-encoded payload bytes
     // The multiSig.transaction_payload contains the entry function to execute
-    const payloadBytes = multisigPayload.multiSig.transaction_payload?.bcsToBytes();
+    const payloadBytes = (multisigPayload as any).multiSig?.transaction_payload?.bcsToBytes();
     if (!payloadBytes) {
       throw new Error('Failed to generate payload bytes');
     }
 
     // Step 3: Call create_transaction with the payload bytes
-    const transaction = await aptos.transaction.build.simple({
+    const transaction = await movement.transaction.build.simple({
       sender: account.address,
       data: {
         function: `0x1::multisig_account::create_transaction`,
@@ -484,14 +641,15 @@ export async function createMultisigProposal(
       },
     });
 
-    const senderAuthenticator = await signTransaction(transaction);
+    // Sign with correct format for Movement adapter
+    const signResult = await signTransaction({ transactionOrPayload: transaction });
 
-    const committedTransaction = await aptos.transaction.submit.simple({
+    const committedTransaction = await movement.transaction.submit.simple({
       transaction,
-      senderAuthenticator,
+      senderAuthenticator: signResult.authenticator,
     });
 
-    await aptos.waitForTransaction({
+    await movement.waitForTransaction({
       transactionHash: committedTransaction.hash
     });
 
@@ -542,40 +700,146 @@ export async function rejectMultisigTransaction(
 }
 
 // Execute an approved multisig transaction
-// When payload is stored on-chain, we submit a TransactionPayloadMultiSig with just the address
+// Builds and submits a multisig execution transaction
 export async function executeMultisigTransaction(
   account: any,
-  signTransaction: any
-): Promise<boolean> {
+  signTransaction: any,
+  sequenceNumber: number
+): Promise<string> {
+  // First verify this is the next transaction to execute
+  const lastResolved = await getLastResolvedSequenceNumber();
+  const nextToExecute = lastResolved + 1;
+
+  if (sequenceNumber !== nextToExecute) {
+    throw new Error(
+      `Cannot execute transaction #${sequenceNumber}. ` +
+      `Transaction #${nextToExecute} must be executed first.`
+    );
+  }
+
+  // Check if transaction has enough approvals
+  const canExecute = await canExecuteMultisigTransaction(sequenceNumber);
+  if (!canExecute) {
+    const threshold = await getMultisigThreshold();
+    const tx = await getMultisigTransaction(sequenceNumber);
+    const currentApprovals = tx?.yesVotes?.length || 0;
+    throw new Error(
+      `Transaction #${sequenceNumber} needs ${threshold} approvals but only has ${currentApprovals}.`
+    );
+  }
+
   try {
-    const aptos = getAptosClient();
+    const movement = getMovementClient();
+    const senderAddress = AccountAddress.from(account.address.toString());
 
-    // Create a multisig execution payload - no inner transaction_payload needed
-    // because the payload is already stored on-chain.
-    // Type assertion needed because SDK types expect function data, but multisig
-    // execution with stored payload only requires the multisig address.
-    const rawTransaction = await aptos.transaction.build.simple({
-      sender: account.address,
+    // Build a reference transaction to get proper gas settings
+    const refTransaction = await movement.transaction.build.simple({
+      sender: senderAddress,
       data: {
-        multisigAddress: MULTISIG_ADDRESS,
-      } as any,
+        function: `0x1::multisig_account::approve_transaction`,
+        functionArguments: [MULTISIG_ADDRESS, sequenceNumber],
+      },
     });
 
-    const senderAuthenticator = await signTransaction(rawTransaction);
+    // Build the multisig execution payload
+    const multisigAddress = AccountAddress.from(MULTISIG_ADDRESS);
+    const multisigPayload = new TransactionPayloadMultiSig(
+      new MultiSig(multisigAddress)
+    );
 
-    const committedTransaction = await aptos.transaction.submit.simple({
-      transaction: rawTransaction,
-      senderAuthenticator,
+    // Get fresh account info
+    const accountInfo = await movement.account.getAccountInfo({ accountAddress: senderAddress });
+    const chainIdResult = await movement.getChainId();
+
+    // Access the raw transaction properties
+    const refRaw = refTransaction.rawTransaction;
+
+    // Build a new raw transaction with the multisig payload
+    const rawTxn = new RawTransaction(
+      senderAddress,
+      BigInt(accountInfo.sequence_number),
+      multisigPayload,
+      refRaw.max_gas_amount,
+      refRaw.gas_unit_price,
+      refRaw.expiration_timestamp_secs,
+      new ChainId(chainIdResult)
+    );
+
+    // Create a proper SimpleTransaction-like object
+    // Clone the reference transaction structure but replace the rawTransaction
+    const transaction = Object.create(Object.getPrototypeOf(refTransaction));
+    Object.assign(transaction, refTransaction);
+    transaction.rawTransaction = rawTxn;
+
+    // Sign using wallet adapter - note the expected argument format
+    const signResult = await signTransaction({ transactionOrPayload: transaction });
+
+    console.log('Sign result:', signResult);
+    console.log('Raw transaction bytes length:', signResult.rawTransaction?.length);
+    console.log('Authenticator:', signResult.authenticator);
+
+    // The wallet adapter returns:
+    // - rawTransaction: the raw transaction bytes (not signed)
+    // - authenticator: the signature/authenticator
+    // We need to combine them into a SignedTransaction
+
+    // Deserialize the raw transaction bytes back to RawTransaction
+    const deserializer = new Deserializer(signResult.rawTransaction);
+    const deserializedRawTxn = RawTransaction.deserialize(deserializer);
+
+    // Create a SignedTransaction combining raw transaction and authenticator
+    const signedTxn = new SignedTransaction(deserializedRawTxn, signResult.authenticator);
+
+    // Serialize the signed transaction to BCS bytes
+    const signedTxnBytes = signedTxn.bcsToBytes();
+    console.log('Signed transaction bytes length:', signedTxnBytes.length);
+
+    // Submit using postBCSTransaction API
+    const fullnodeUrl = process.env.NEXT_PUBLIC_FULLNODE_URL;
+    if (!fullnodeUrl) {
+      throw new Error('FULLNODE_URL not configured');
+    }
+
+    // Remove trailing /v1 if present to avoid double path
+    const baseUrl = fullnodeUrl.replace(/\/v1\/?$/, '');
+
+    // Submit the signed transaction bytes directly to the API
+    // Create a new Uint8Array to ensure it's a proper ArrayBuffer
+    const bodyBytes = new Uint8Array(signedTxnBytes);
+    const response = await fetch(`${baseUrl}/v1/transactions`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x.aptos.signed_transaction+bcs',
+      },
+      body: bodyBytes as unknown as BodyInit,
     });
 
-    await aptos.waitForTransaction({
-      transactionHash: committedTransaction.hash
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('Submit error:', errorText);
+      throw new Error(`Transaction submission failed: ${errorText}`);
+    }
+
+    const result = await response.json();
+    console.log('Submit result:', result);
+
+    // Wait for transaction
+    await movement.waitForTransaction({
+      transactionHash: result.hash,
     });
 
-    console.log('Multisig transaction executed successfully');
-    return true;
-  } catch (error) {
+    console.log('Multisig transaction executed:', result.hash);
+    return result.hash;
+  } catch (error: any) {
     console.error('Error executing multisig transaction:', error);
+    // Parse common errors
+    const errorMsg = error?.message || String(error);
+    if (errorMsg.includes('SEQUENCE_NUMBER')) {
+      throw new Error('Transaction order error. Refresh and try again.');
+    }
+    if (errorMsg.includes('NOT_ENOUGH_APPROVALS')) {
+      throw new Error('Not enough approvals to execute this transaction.');
+    }
     throw error;
   }
 }
@@ -731,7 +995,7 @@ export async function removeOwner(
 // Treasury and Fee Management
 export async function getTreasuryAddress(): Promise<string> {
   try {
-    const aptos = getAptosClient();
+    const aptos = getMovementClient();
     const result = await aptos.view({
       payload: {
         function: `${REGISTRY_ADDRESS}::app_registry::get_treasury_address`,
@@ -747,7 +1011,7 @@ export async function getTreasuryAddress(): Promise<string> {
 
 export async function getSubmitFee(): Promise<number> {
   try {
-    const aptos = getAptosClient();
+    const aptos = getMovementClient();
     const result = await aptos.view({
       payload: {
         function: `${REGISTRY_ADDRESS}::app_registry::get_submit_fee`,
