@@ -11,6 +11,7 @@ import {
   RECOMMENDATION_COLORS,
   RECOMMENDATION_LABELS,
 } from '@/types/review';
+import { SecurityScanPanel } from './SecurityScanPanel';
 
 interface AutomatedReviewPanelProps {
   app: AppMetadata;
@@ -302,6 +303,9 @@ export function AutomatedReviewPanel({ app, onReviewComplete, onChecklistComplet
           Click "Run Checks" to perform automated review
         </p>
       )}
+
+      {/* Security Scan Panel */}
+      <SecurityScanPanel app={app} />
 
       {/* Manual Review Checklist */}
       <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">

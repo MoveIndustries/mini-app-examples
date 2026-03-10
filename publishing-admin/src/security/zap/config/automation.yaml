@@ -1,0 +1,124 @@
+# ZAP Automation Framework Configuration
+# For Mini App Security Testing
+
+env:
+  contexts:
+    - name: mini-app-security-test
+      urls:
+        # This will be replaced dynamically with the mini app URL
+        - ${MINI_APP_URL}
+      includePaths:
+        - ${MINI_APP_URL}.*
+      excludePaths: []
+      authentication:
+        method: manual
+      sessionManagement:
+        method: cookie
+      technology:
+        include:
+          - JavaScript
+          - React
+          - HTML5
+
+  parameters:
+    failOnError: true
+    failOnWarning: false
+    progressToStdout: true
+
+  vars:
+    miniAppUrl: ${MINI_APP_URL}
+    reportDir: ./security-reports
+    maxScanDuration: 30 # minutes
+
+jobs:
+  # Initialize Selenium for Ajax Spider
+  - type: selenium
+    name: selenium-setup
+    parameters:
+      browser: chrome-headless
+      # Script will be loaded separately via API
+
+  # Access the target URL
+  - type: requestor
+    name: initial-access
+    parameters:
+      url: ${miniAppUrl}
+
+  # Run Ajax Spider to discover pages and functionality
+  - type: spiderAjax
+    name: ajax-spider
+    parameters:
+      context: mini-app-security-test
+      url: ${miniAppUrl}
+      maxDuration: ${maxScanDuration}
+      maxCrawlDepth: 10
+      numberOfBrowsers: 2
+      browserId: chrome-headless
+      inScopeOnly: true
+
+  # Wait for Ajax Spider to complete
+  - type: passiveScan-wait
+    name: wait-for-passive
+    parameters:
+      maxDuration: 5 # minutes
+
+  # Run Active Scan for vulnerability detection
+  - type: activeScan
+    name: active-scan
+    parameters:
+      context: mini-app-security-test
+      policy: Default Policy
+      user: ''
+      url: ${miniAppUrl}
+      maxRuleDurationInMins: 0
+      maxScanDurationInMins: ${maxScanDuration}
+      addQueryParam: false
+      defaultPolicy: ''
+      delayInMs: 0
+      handleAntiCSRFTokens: true
+      injectPluginIdInHeader: false
+      scanHeadersAllRequests: true
+
+  # Wait for Active Scan to complete
+  - type: passiveScan-wait
+    name: wait-for-active
+    parameters:
+      maxDuration: 5 # minutes
+
+  # Generate HTML report
+  - type: report
+    name: html-report
+    parameters:
+      template: traditional-html
+      reportDir: ${reportDir}
+      reportFile: mini-app-security-report.html
+      reportTitle: Mini App Security Test Report
+      reportDescription: Security testing results for mini app
+
+  # Generate JSON report for programmatic access
+  - type: report
+    name: json-report
+    parameters:
+      template: traditional-json
+      reportDir: ${reportDir}
+      reportFile: mini-app-security-report.json
+
+  # Generate XML report
+  - type: report
+    name: xml-report
+    parameters:
+      template: traditional-xml
+      reportDir: ${reportDir}
+      reportFile: mini-app-security-report.xml
+
+  # Set exit status based on scan results
+  - type: exitStatus
+    name: exit-status
+    parameters:
+      # Fail if high risk alerts found
+      errorOnHighAlerts: true
+      # Warning on medium risk alerts
+      warnOnMediumAlerts: true
+      # Ignore low and info alerts
+      errorOnLowAlerts: false
+      errorOnInfoAlerts: false
