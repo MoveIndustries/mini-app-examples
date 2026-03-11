@@ -2,7 +2,7 @@ import DefaultTheme from 'vitepress/theme';
 import type { Theme } from 'vitepress';
 
 // Movement Design System styles
-import '@moveindustries/movement-design-system/theme';
+import 'movement-design-system/theme';
 import './fonts.css';
 
 import './custom.css';
