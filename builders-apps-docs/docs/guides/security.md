@@ -76,7 +76,7 @@ The SDK sets CSP headers to prevent XSS attacks:
 ```
 default-src 'self';
 script-src 'self' 'unsafe-inline' 'unsafe-eval';
-connect-src 'self' https://*.movementlabs.xyz https://*.movementlabs.xyz;
+connect-src 'self' https://*.moveindustries.xyz https://*.moveindustries.xyz;
 ```
 
 ---
@@ -86,7 +86,7 @@ connect-src 'self' https://*.movementlabs.xyz https://*.movementlabs.xyz;
 Customize security settings for your app:
 
 ```typescript
-import { getMovementSDK } from '@movement-labs/miniapp-sdk';
+import { getMovementSDK } from '@moveindustries/mini-app-sdk';
 
 const sdk = getMovementSDK({
   // Maximum transaction amount (in octas)
@@ -199,7 +199,7 @@ async function withdrawFunds(amount: string) {
   await sdk.sendTransaction({
     function: '0x1::coin::transfer',
     arguments: [recipient, amount],
-    type_arguments: ['0x1::aptos_coin::MovementCoin'],
+    type_arguments: ['0x1::aptos_coin::AptosCoin'],
   });
 }
 ```
@@ -371,7 +371,7 @@ Before launching your mini app:
 If you discover a security vulnerability:
 
 1. **DO NOT** open a public issue
-2. Email security@movementlabs.xyz
+2. Email security@moveindustries.xyz
 3. Include detailed reproduction steps
 4. We'll respond within 48 hours
 
@@ -381,4 +381,4 @@ If you discover a security vulnerability:
 
 - **[OWASP Mobile Security](https://owasp.org/www-project-mobile-security/)** - Mobile security best practices
 - **[Web3 Security](https://github.com/Consensys/smart-contract-best-practices)** - Smart contract security
-- **[SDK Source Code](https://github.com/movementlabsxyz/miniapp-sdk)** - Review security implementations
+- **[SDK Source Code](https://github.com/moveindustries/miniapp-sdk)** - Review security implementations

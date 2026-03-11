@@ -19,8 +19,8 @@ Build blockchain games with Unity and deploy them as Movement Mini Apps.
 ### 2. Install Movement SDK
 
 Download the Movement Unity SDK:
-- [MovementSDK.cs](https://github.com/movementlabsxyz/unity-sdk/blob/main/MovementSDK.cs)
-- [MovementBridge.jslib](https://github.com/movementlabsxyz/unity-sdk/blob/main/MovementBridge.jslib)
+- [MovementSDK.cs](https://github.com/moveindustries/unity-sdk/blob/main/MovementSDK.cs)
+- [MovementBridge.jslib](https://github.com/moveindustries/unity-sdk/blob/main/MovementBridge.jslib)
 
 Place files in your project:
 ```
@@ -123,7 +123,7 @@ if (MovementSDK.Instance.IsConnected)
 MovementSDK.Instance.SubmitTransaction(
     function: "0x1::coin::transfer",
     arguments: new string[] { recipientAddress, amount },
-    typeArguments: new string[] { "0x1::aptos_coin::MovementCoin" }
+    typeArguments: new string[] { "0x1::aptos_coin::AptosCoin" }
 );
 ```
 
@@ -283,8 +283,8 @@ netlify deploy --prod
 
 ## Example Projects
 
-- [Movement Racer](https://github.com/movementlabsxyz/unity-racer) - Racing game with leaderboards
-- [Coin Collector](https://github.com/movementlabsxyz/unity-coin-collector) - Simple arcade game
+- [Movement Racer](https://github.com/moveindustries/unity-racer) - Racing game with leaderboards
+- [Coin Collector](https://github.com/moveindustries/unity-coin-collector) - Simple arcade game
 
 ## Troubleshooting
 

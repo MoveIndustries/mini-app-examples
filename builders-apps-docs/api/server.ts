@@ -33,7 +33,7 @@ const tools = {
           start: 'next start',
         },
         dependencies: {
-          '@movement-labs/miniapp-sdk': '^0.2.0',
+          '@moveindustries/mini-app-sdk': '^0.2.0',
           next: '^14.0.0',
           react: '^18.2.0',
           'react-dom': '^18.2.0',

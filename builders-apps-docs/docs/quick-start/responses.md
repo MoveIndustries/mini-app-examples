@@ -260,7 +260,7 @@ return () => unsubscribe();
 
 ```tsx
 import { useState } from 'react';
-import { useMovementSDK } from '@movement-labs/miniapp-sdk';
+import { useMovementSDK } from '@moveindustries/mini-app-sdk';
 
 function TransferButton() {
   const { sdk } = useMovementSDK();
@@ -308,7 +308,7 @@ function TransferButton() {
 
 ```tsx
 import { useState, useEffect } from 'react';
-import { useMovementSDK } from '@movement-labs/miniapp-sdk';
+import { useMovementSDK } from '@moveindustries/mini-app-sdk';
 
 function TransferStatus({ hash }) {
   const { sdk } = useMovementSDK();

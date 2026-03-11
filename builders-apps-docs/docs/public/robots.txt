@@ -20,7 +20,7 @@ User-agent: Claude-Web
 Allow: /llms.txt
 
 # Sitemap (if you have one)
-# Sitemap: https://docs.movementlabs.xyz/sitemap.xml
+# Sitemap: https://docs.moveindustries.xyz/sitemap.xml
 
 
 

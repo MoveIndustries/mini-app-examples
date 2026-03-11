@@ -30,7 +30,7 @@ A simple app that:
 ```bash [Next.js (Recommended)]
 npx create-next-app@latest my-mini-app
 cd my-mini-app
-npm install @movement-labs/miniapp-sdk
+npm install @moveindustries/mini-app-sdk
 ```
 
 ```bash [Vanilla JavaScript]

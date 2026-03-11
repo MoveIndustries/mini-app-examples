@@ -530,4 +530,4 @@ Need help publishing your app?
 
 - **[Testing →](/quick-start/testing)** - Test your app in developer mode
 - **[Design Guidelines →](/guidelines/design)** - Polish your UI
-- **Smart Contract** - View the [registry contract source](https://github.com/movement-labs/...)
+- **Smart Contract** - View the [registry contract source](https://github.com/moveindustries/...)

@@ -43,7 +43,7 @@ async function handleScanRecipient() {
 
 ```tsx
 import { useState } from 'react';
-import { useMovementSDK } from '@movement-labs/miniapp-sdk';
+import { useMovementSDK } from '@moveindustries/mini-app-sdk';
 
 function RecipientInput() {
   const { sdk } = useMovementSDK();

@@ -126,7 +126,7 @@ Need help? Check out:
 - [SDK Documentation](/sdk/overview)
 - [API Reference](/reference/sdk-api)
 - [Security Guide](/guides/security)
-- [Discord Community](https://discord.gg/movementlabs)
+- [Discord Community](https://discord.gg/moveindustries)
 
 ---
 

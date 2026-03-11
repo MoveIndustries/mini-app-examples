@@ -5,7 +5,7 @@ Complete reference for all Movement SDK methods and properties.
 ## Installation
 
 ```bash
-npm install @movement-labs/miniapp-sdk
+npm install @moveindustries/mini-app-sdk
 ```
 
 ## SDK Status
@@ -1136,7 +1136,7 @@ interface UseMovementSDKResult {
 **Example:**
 
 ```tsx
-import { useMovementSDK } from '@movement-labs/miniapp-sdk';
+import { useMovementSDK } from '@moveindustries/mini-app-sdk';
 
 function MyComponent() {
   const {
@@ -1184,7 +1184,7 @@ interface UseMovementAccountResult {
 **Example:**
 
 ```tsx
-import { useMovementAccount } from '@movement-labs/miniapp-sdk';
+import { useMovementAccount } from '@moveindustries/mini-app-sdk';
 
 function AccountInfo() {
   const { account, isLoading } = useMovementAccount();
@@ -1219,7 +1219,7 @@ interface UseMovementThemeResult {
 **Example:**
 
 ```tsx
-import { useMovementTheme } from '@movement-labs/miniapp-sdk';
+import { useMovementTheme } from '@moveindustries/mini-app-sdk';
 
 function App() {
   const { theme, isLoading, error } = useMovementTheme();
@@ -1262,7 +1262,7 @@ interface UseAnalyticsResult {
 **Example:**
 
 ```tsx
-import { useAnalytics } from '@movement-labs/miniapp-sdk';
+import { useAnalytics } from '@moveindustries/mini-app-sdk';
 
 function MyComponent() {
   const { track, trackScreen, isAvailable } = useAnalytics();
@@ -1300,7 +1300,7 @@ Check if app is running in Movement wallet (alternative to `sdk.isInstalled()`).
 **Returns:** `boolean`
 
 ```typescript
-import { isInMovementApp } from '@movement-labs/miniapp-sdk';
+import { isInMovementApp } from '@moveindustries/mini-app-sdk';
 
 if (!isInMovementApp()) {
   console.error('Not in Movement app');
@@ -1318,7 +1318,7 @@ Wait for SDK to be available with timeout.
 **Returns:** `Promise<MovementSDK>`
 
 ```typescript
-import { waitForSDK } from '@movement-labs/miniapp-sdk';
+import { waitForSDK } from '@moveindustries/mini-app-sdk';
 
 try {
   const sdk = await waitForSDK(5000); // 5 second timeout
@@ -1484,7 +1484,7 @@ console.log('Analytics enabled:', enabled);
 Configure SDK security settings.
 
 ```typescript
-import { getMovementSDK } from '@movement-labs/miniapp-sdk';
+import { getMovementSDK } from '@moveindustries/mini-app-sdk';
 
 const sdk = getMovementSDK({
   maxTransactionAmount: '500000000',  // Max amount in octas
@@ -1548,7 +1548,7 @@ import type {
   BatchTransactionResult,
   ScriptComposerPayload,
   MNSAPI
-} from '@movement-labs/miniapp-sdk';
+} from '@moveindustries/mini-app-sdk';
 ```
 
 ---

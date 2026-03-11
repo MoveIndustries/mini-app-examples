@@ -48,13 +48,13 @@ Mini apps are lightweight web applications that run inside the Movement "Move Ev
 ## Installation
 
 \`\`\`bash
-npm install @movement-labs/miniapp-sdk
+npm install @moveindustries/mini-app-sdk
 \`\`\`
 
 ## Quick Start (React)
 
 \`\`\`typescript
-import { useMovementSDK } from '@movement-labs/miniapp-sdk';
+import { useMovementSDK } from '@moveindustries/mini-app-sdk';
 
 function App() {
   const { sdk, address, isConnected, isLoading } = useMovementSDK();
@@ -220,7 +220,7 @@ For llms-full.txt with complete API reference and examples, fetch: /llms-full.tx
       { text: 'Publishing', link: '/publishing/' },
       { text: 'Guidelines', link: '/guidelines/design' },
       // { text: 'AI Builder', link: '/ai-builder' },
-      { text: 'GitHub', link: 'https://github.com/movementlabsxyz' }
+      { text: 'GitHub', link: 'https://github.com/moveindustries' }
     ],
 
     sidebar: [
@@ -294,9 +294,9 @@ For llms-full.txt with complete API reference and examples, fetch: /llms-full.tx
     },
 
     socialLinks: [
-      { icon: 'github', link: 'https://github.com/movementlabsxyz' },
+      { icon: 'github', link: 'https://github.com/moveindustries' },
       { icon: 'twitter', link: 'https://twitter.com/moveindustries' },
-      { icon: 'discord', link: 'https://discord.gg/movementlabs' }
+      { icon: 'discord', link: 'https://discord.gg/moveindustries' }
     ],
 
     footer: {
@@ -305,7 +305,7 @@ For llms-full.txt with complete API reference and examples, fetch: /llms-full.tx
     },
 
     editLink: {
-      pattern: 'https://github.com/movementlabsxyz/miniapp-docs/edit/main/docs/:path',
+      pattern: 'https://github.com/moveindustries/miniapp-docs/edit/main/docs/:path',
       text: 'Edit this page on GitHub'
     }
   }

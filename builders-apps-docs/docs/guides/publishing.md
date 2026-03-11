@@ -84,7 +84,7 @@ Create a JSON file with your app details:
 
 ### 2. Submit for Review
 
-Email your app metadata to: **apps@movementlabs.xyz**
+Email your app metadata to: **apps@moveindustries.xyz**
 
 Include:
 - App metadata JSON
@@ -213,9 +213,9 @@ Apps may be removed if they:
 
 Need help publishing?
 
-- **Discord**: [discord.gg/movementlabs](https://discord.gg/movementlabs)
-- **Email**: apps@movementlabs.xyz
-- **Docs**: [docs.movementlabs.xyz](https://docs.movementlabs.xyz)
+- **Discord**: [discord.gg/moveindustries](https://discord.gg/moveindustries)
+- **Email**: apps@moveindustries.xyz
+- **Docs**: [docs.moveindustries.xyz](https://docs.moveindustries.xyz)
 
 ---
 
@@ -223,4 +223,4 @@ Need help publishing?
 
 - **[Advanced Transactions](/guides/advanced-transactions)** - Complex transaction patterns
 - **[Security Guide](/guides/security)** - Best practices
-- **[Examples](https://github.com/movementlabsxyz/miniapp-examples)** - Sample apps
+- **[Examples](https://github.com/moveindustries/miniapp-examples)** - Sample apps

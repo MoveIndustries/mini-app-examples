@@ -19,7 +19,7 @@ cd my-miniapp
 ### 2. Install the Movement SDK
 
 ```bash
-npm install @movement-labs/miniapp-sdk
+npm install @moveindustries/mini-app-sdk
 ```
 
 ## Basic Setup
@@ -31,7 +31,7 @@ Create `app/page.tsx`:
 ```tsx
 'use client';
 
-import { useMovementSDK } from '@movement-labs/miniapp-sdk';
+import { useMovementSDK } from '@moveindustries/mini-app-sdk';
 import { useEffect } from 'react';
 
 export default function Home() {
@@ -106,7 +106,7 @@ const { sendTransaction } = useMovementSDK();
 
 const result = await sendTransaction({
   function: '0x1::coin::transfer',
-  type_arguments: ['0x1::aptos_coin::MovementCoin'],
+  type_arguments: ['0x1::aptos_coin::AptosCoin'],
   arguments: [receiverAddress, amount],
 });
 ```
@@ -160,7 +160,7 @@ Deploy to any static hosting:
 ```tsx
 'use client';
 
-import { useMovementSDK } from '@movement-labs/miniapp-sdk';
+import { useMovementSDK } from '@moveindustries/mini-app-sdk';
 import { useState } from 'react';
 
 export default function TransferApp() {
@@ -227,5 +227,5 @@ export default function TransferApp() {
 ## Next Steps
 
 - Explore the [SDK API Reference](/reference/sdk-api)
-- Check out [example mini apps](https://github.com/movementlabsxyz/miniapp-examples)
+- Check out [example mini apps](https://github.com/moveindustries/miniapp-examples)
 - Join the [Movement Discord](https://discord.gg/movement) for help

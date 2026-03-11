@@ -3,10 +3,10 @@
 Build decentralized apps that run natively in Movement wallet. Ship fast, reach millions.
 
 <div class="hero-badges">
-  <span class="badge">⚡️ Zero Install</span>
-  <span class="badge">🔐 Built-in Wallet</span>
-  <span class="badge">📱 Native APIs</span>
-  <span class="badge">🚀 Instant Deploy</span>
+  <span class="badge"><svg class="badge-icon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h7l-1 6 10-12h-7l1-6z"/></svg> Zero Install</span>
+  <span class="badge"><svg class="badge-icon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="9" width="14" height="9" rx="2"/><path d="M7 9V6a3 3 0 0 1 6 0v3"/></svg> Built-in Wallet</span>
+  <span class="badge"><svg class="badge-icon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="2" width="10" height="16" rx="2"/><line x1="10" y1="15" x2="10" y2="15.01" stroke-linecap="round"/></svg> Native APIs</span>
+  <span class="badge"><svg class="badge-icon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 2L4 8l6 6"/><path d="M10 2l6 6-6 6"/><line x1="10" y1="14" x2="10" y2="18"/></svg> Instant Deploy</span>
 </div>
 
 ---
@@ -22,25 +22,25 @@ Lightweight web applications that run inside the Move Everything super app. Buil
 <div class="feature-grid">
 
 <div class="feature-card">
-  <div class="feature-icon">⚡️</div>
+  <div class="feature-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg></div>
   <h3>Ship Fast</h3>
   <p>Build with web tech. Deploy instantly. No app store reviews, no waiting.</p>
 </div>
 
 <div class="feature-card">
-  <div class="feature-icon">👛</div>
+  <div class="feature-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="20" height="14" rx="3"/><path d="M2 10h20"/><path d="M6 14h.01"/><path d="M10 14h4"/></svg></div>
   <h3>Built-in Wallet</h3>
   <p>Users are already connected. Accept payments and sign transactions seamlessly.</p>
 </div>
 
 <div class="feature-card">
-  <div class="feature-icon">📱</div>
+  <div class="feature-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2" width="14" height="20" rx="3"/><line x1="12" y1="18" x2="12" y2="18.01"/></svg></div>
   <h3>Native Features</h3>
   <p>Access camera, biometrics, NFC, haptics, location, and more through simple APIs.</p>
 </div>
 
 <div class="feature-card">
-  <div class="feature-icon">🌍</div>
+  <div class="feature-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M2 12h20"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg></div>
   <h3>Global Reach</h3>
   <p>Instant distribution to millions of Movement wallet users worldwide.</p>
 </div>
@@ -105,7 +105,7 @@ Rate limiting, transaction validation, replay protection, CSP
 ::: code-group
 
 ```typescript [React]
-import { useMovementSDK } from '@movement-labs/miniapp-sdk';
+import { useMovementSDK } from '@moveindustries/mini-app-sdk';
 
 export default function App() {
   const { sdk } = useMovementSDK();
@@ -149,7 +149,7 @@ Using **Cursor**, **Claude Code**, **GitHub Copilot**, or other AI coding assist
 <div class="ai-docs-grid">
 
 <a href="/llms.txt" class="ai-doc-card">
-  <div class="ai-doc-icon">⚡</div>
+  <div class="ai-doc-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg></div>
   <div class="ai-doc-content">
     <h3>llms.txt</h3>
     <p>Quick context - documentation index with table of contents</p>
@@ -157,7 +157,7 @@ Using **Cursor**, **Claude Code**, **GitHub Copilot**, or other AI coding assist
 </a>
 
 <a href="/llms-full.txt" class="ai-doc-card">
-  <div class="ai-doc-icon">📚</div>
+  <div class="ai-doc-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/><line x1="8" y1="7" x2="16" y2="7"/><line x1="8" y1="11" x2="16" y2="11"/></svg></div>
   <div class="ai-doc-content">
     <h3>llms-full.txt</h3>
     <p>Complete docs - all pages concatenated in one file</p>
@@ -178,17 +178,20 @@ curl -o llms-full.txt https://mini-app-docs.vercel.app/llms-full.txt
 <div class="resource-grid">
 
 <a href="/quick-start/" class="resource-card">
-  <h3>📖 Documentation</h3>
+  <div class="resource-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg></div>
+  <h3>Documentation</h3>
   <p>Complete guides and API reference</p>
 </a>
 
 <a href="/commands/" class="resource-card">
-  <h3>⚡️ Commands</h3>
+  <div class="resource-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg></div>
+  <h3>Commands</h3>
   <p>All available SDK methods</p>
 </a>
 
 <a href="/guidelines/design" class="resource-card">
-  <h3>🎨 Design Guidelines</h3>
+  <div class="resource-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19l7-7 3 3-7 7-3-3z"/><path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"/><path d="M2 2l7.586 7.586"/><circle cx="11" cy="11" r="2"/></svg></div>
+  <h3>Design Guidelines</h3>
   <p>Build beautiful, native-feeling UIs</p>
 </a>
 
@@ -200,11 +203,11 @@ curl -o llms-full.txt https://mini-app-docs.vercel.app/llms-full.txt
 
 <div class="community-links">
 
-**[Discord](https://discord.gg/movementlabs)** · Get help and share ideas
+**[Discord](https://discord.gg/moveindustries)** · Get help and share ideas
 
-**[GitHub](https://github.com/movementlabsxyz)** · Explore examples and contribute
+**[GitHub](https://github.com/moveindustries)** · Explore examples and contribute
 
-**[Twitter](https://twitter.com/movementlabsxyz)** · Stay updated on new features
+**[Twitter](https://twitter.com/moveindustries)** · Stay updated on new features
 
 </div>
 
@@ -250,9 +253,21 @@ curl -o llms-full.txt https://mini-app-docs.vercel.app/llms-full.txt
   transform: translateY(-2px);
 }
 
+.badge-icon {
+  width: 16px;
+  height: 16px;
+  vertical-align: -2px;
+  display: inline-block;
+}
+
 .feature-icon {
-  font-size: 2rem;
   margin-bottom: 0.75rem;
+}
+
+.feature-icon svg {
+  width: 32px;
+  height: 32px;
+  color: var(--vp-c-brand-1);
 }
 
 .feature-card h3 {
@@ -372,6 +387,16 @@ curl -o llms-full.txt https://mini-app-docs.vercel.app/llms-full.txt
   transform: translateY(-2px);
 }
 
+.resource-icon {
+  margin-bottom: 0.75rem;
+}
+
+.resource-icon svg {
+  width: 28px;
+  height: 28px;
+  color: var(--vp-c-brand-1);
+}
+
 .resource-card h3 {
   margin: 0 0 0.5rem 0;
   font-size: 1.125rem;
@@ -432,8 +457,13 @@ curl -o llms-full.txt https://mini-app-docs.vercel.app/llms-full.txt
 }
 
 .ai-doc-icon {
-  font-size: 2rem;
   flex-shrink: 0;
+}
+
+.ai-doc-icon svg {
+  width: 32px;
+  height: 32px;
+  color: var(--vp-c-brand-1);
 }
 
 .ai-doc-content h3 {

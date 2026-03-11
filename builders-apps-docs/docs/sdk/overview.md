@@ -9,7 +9,7 @@ The Movement Mini App SDK provides a comprehensive set of APIs to build rich, na
 Access users' wallets and execute blockchain transactions:
 
 ```typescript
-import { useMovementSDK } from '@movement-labs/miniapp-sdk';
+import { useMovementSDK } from '@moveindustries/mini-app-sdk';
 
 const { sdk, isConnected, address } = useMovementSDK();
 
@@ -225,7 +225,7 @@ await sdk.sendTransaction({
 Configure security settings:
 
 ```typescript
-import { getMovementSDK, createSecurityManager } from '@movement-labs/miniapp-sdk';
+import { getMovementSDK, createSecurityManager } from '@moveindustries/mini-app-sdk';
 
 const sdk = getMovementSDK({
   maxTransactionAmount: '500000000', // 5 MOVE max
@@ -240,7 +240,7 @@ const sdk = getMovementSDK({
 Use convenient React hooks for common operations:
 
 ```typescript
-import { useMovementSDK, useMovementAccount } from '@movement-labs/miniapp-sdk';
+import { useMovementSDK, useMovementAccount } from '@moveindustries/mini-app-sdk';
 
 // Main SDK hook
 const {
@@ -281,4 +281,4 @@ await sdk.close?.();
 
 - **[API Reference](/reference/sdk-api)** - Complete API documentation
 - **[Security Best Practices](/guides/security)** - Secure your app
-- **[Examples]https://github.com/movementlabsxyz/miniapp-examples** - See the SDK in action
+- **[Examples]https://github.com/moveindustries/miniapp-examples** - See the SDK in action

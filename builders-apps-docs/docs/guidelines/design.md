@@ -74,22 +74,22 @@ The Movement Design System provides a complete set of components, tokens, and pa
 Install the design system:
 
 ```bash
-npm install movement-design-system
+npm install @moveindustries/movement-design-system
 # or
-pnpm add movement-design-system
+pnpm add @moveindustries/movement-design-system
 ```
 
 Import styles in your app:
 
 ```css
-@import "movement-design-system/component-styles";
-@import "movement-design-system/theme";
+@import "@moveindustries/movement-design-system/component-styles";
+@import "@moveindustries/movement-design-system/theme";
 ```
 
 ### Documentation
 
 ::: tip Design System Docs
-Browse the complete [Movement Design System documentation](https://movement-design-system-docs-git-shadcn-movement-labs.vercel.app/) for:
+Browse the complete [Movement Design System documentation](https://movement-design-system-docs-git-shadcn-moveindustries.vercel.app/) for:
 - All available components (Card, Button, Badge, etc.)
 - Component variants and props
 - Interactive examples
@@ -109,14 +109,14 @@ The design system includes:
 - **Display**: Avatar, Separator
 - **Icons**: Comprehensive icon library
 
-See the [design system docs](https://movement-design-system-docs-git-shadcn-movement-labs.vercel.app/) for complete component documentation.
+See the [design system docs](https://movement-design-system-docs-git-shadcn-moveindustries.vercel.app/) for complete component documentation.
 
 ## Color Palette
 
 The Movement Design System provides all color tokens. Import the theme to access them:
 
 ```css
-@import "movement-design-system/theme";
+@import "@moveindustries/movement-design-system/theme";
 
 /* Primary brand color */
 --movement-primary: #00D4AA;
@@ -128,7 +128,7 @@ The Movement Design System provides all color tokens. Import the theme to access
 --info: #3B82F6;
 ```
 
-For complete color documentation, see the [design system theme docs](https://movement-design-system-docs-git-shadcn-movement-labs.vercel.app/?path=/story/movement-design-system-theme--colors).
+For complete color documentation, see the [design system theme docs](https://movement-design-system-docs-git-shadcn-moveindustries.vercel.app/?path=/story/movement-design-system-theme--colors).
 
 ## Typography
 
@@ -221,7 +221,7 @@ Use the Movement Design System components instead of building custom ones. This 
 ### Using Design System Components
 
 ```tsx
-import { Button, Card, CardContent, CardHeader, CardTitle, Badge } from 'movement-design-system';
+import { Button, Card, CardContent, CardHeader, CardTitle, Badge } from '@moveindustries/movement-design-system';
 
 // Button with variants
 <Button>Primary</Button>
@@ -251,7 +251,7 @@ For complete component documentation, including:
 - Interactive playgrounds
 - Accessibility guidelines
 
-See the [Movement Design System component docs](https://movement-design-system-docs-git-shadcn-movement-labs.vercel.app/?path=/story/movement-design-system-card--grid-layout-dots).
+See the [Movement Design System component docs](https://movement-design-system-docs-git-shadcn-moveindustries.vercel.app/?path=/story/movement-design-system-card--grid-layout-dots).
 
 ## Layout Patterns
 
@@ -519,8 +519,8 @@ Optimize images, lazy-load content, minimize bundle size.
 
 ## Resources
 
-- **[Movement Design System Docs](https://movement-design-system-docs-git-shadcn-movement-labs.vercel.app/)** - Complete component library and documentation
-- **[Design System GitHub](https://github.com/movementlabsxyz/movement-design-system)** - Source code and issues
+- **[Movement Design System Docs](https://movement-design-system-docs-git-shadcn-moveindustries.vercel.app/)** - Complete component library and documentation
+- **[Design System GitHub](https://github.com/moveindustries/movement-design-system)** - Source code and issues
 
 ## Examples
 

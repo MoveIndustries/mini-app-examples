@@ -21,7 +21,7 @@ Multi-agent transactions allow multiple accounts to participate in a single tran
 ### Example: Multi-Sig Approval
 
 ```typescript
-import { useMovementSDK } from '@movement-labs/miniapp-sdk';
+import { useMovementSDK } from '@moveindustries/mini-app-sdk';
 
 const { sdk } = useMovementSDK();
 
