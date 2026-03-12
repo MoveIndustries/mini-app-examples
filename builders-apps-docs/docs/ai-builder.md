@@ -130,4 +130,4 @@ Need help? Check out:
 
 ---
 
-**Ready to build?** Start chatting with the AI Builder above! 🚀
+**Ready to build?** Start chatting with the AI Builder above! <Icon name="rocket" />

@@ -284,7 +284,7 @@ For llms-full.txt with complete API reference and examples, fetch: /llms-full.tx
         collapsed: false,
         items: [
           { text: 'Publishing Guide', link: '/publishing/' },
-          { text: '🚀 Publish App', link: '/publishing/publisher' },
+          { text: 'Publish App', link: '/publishing/publisher' },
         ]
       },
     ],

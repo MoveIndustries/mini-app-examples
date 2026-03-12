@@ -3,7 +3,7 @@
     <div class="ai-builder-container">
       <div class="chat-header">
         <div class="header-content">
-          <div class="header-icon">🤖</div>
+          <div class="header-icon"><PhRobot :size="40" /></div>
           <div class="header-text">
             <h2>AI Mini App Builder</h2>
             <p>Describe your mini app idea and I'll help you build it</p>
@@ -16,7 +16,7 @@
 
       <div class="chat-messages" ref="messagesContainer">
         <div v-if="messages.length === 0" class="welcome-message">
-          <h3>👋 Let's build something amazing!</h3>
+          <h3><PhHandWaving :size="28" style="vertical-align: middle; margin-right: 8px;" />Let's build something amazing!</h3>
           <p>
             I can help you create blockchain-powered mini apps for the Movement
             Everything wallet.
@@ -40,7 +40,8 @@
           :class="['message', message.role]"
         >
           <div class="message-avatar">
-            {{ message.role === 'user' ? '👤' : '🤖' }}
+            <PhUser v-if="message.role === 'user'" :size="24" />
+            <PhRobot v-else :size="24" />
           </div>
           <div class="message-content">
             <div class="message-text" v-html="formatMessage(message.content)"></div>
@@ -48,7 +49,7 @@
         </div>
 
         <div v-if="isLoading" class="message assistant">
-          <div class="message-avatar">🤖</div>
+          <div class="message-avatar"><PhRobot :size="24" /></div>
           <div class="message-content">
             <div class="typing-indicator">
               <span></span>
@@ -88,6 +89,7 @@
 
 <script setup lang="ts">
 import { ref, nextTick } from 'vue';
+import { PhRobot, PhHandWaving, PhUser } from '@phosphor-icons/vue';
 
 interface Message {
   role: 'user' | 'assistant';

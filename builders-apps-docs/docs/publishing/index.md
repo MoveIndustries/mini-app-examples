@@ -77,7 +77,7 @@ Declare all permissions your app needs:
 
 Before submitting, ensure your app meets these requirements:
 
-### ✅ Technical Requirements
+### <Icon name="check-circle" color="var(--vp-c-green-1)" weight="fill" /> Technical Requirements
 
 - [ ] **HTTPS Required** - App must be served over HTTPS
 - [ ] **Mobile Responsive** - Works on all mobile screen sizes
@@ -86,7 +86,7 @@ Before submitting, ensure your app meets these requirements:
 - [ ] **Error Handling** - Handles all error states gracefully
 - [ ] **No External Auth** - Uses wallet authentication only
 
-### ✅ Content Requirements
+### <Icon name="check-circle" color="var(--vp-c-green-1)" weight="fill" /> Content Requirements
 
 - [ ] **Clear Purpose** - App purpose is immediately clear
 - [ ] **User-Friendly** - Intuitive interface and navigation
@@ -94,14 +94,14 @@ Before submitting, ensure your app meets these requirements:
 - [ ] **Professional** - High-quality UI and branding
 - [ ] **Original** - Not a copy of existing app
 
-### ✅ Security Requirements
+### <Icon name="check-circle" color="var(--vp-c-green-1)" weight="fill" /> Security Requirements
 
 - [ ] **Permission Scoping** - Only request necessary permissions
 - [ ] **No Malicious Code** - No phishing, scams, or exploits
 - [ ] **Data Privacy** - Complies with data protection standards
 - [ ] **Open Source** (Recommended) - Source code publicly available
 
-### 💰 Submission Fee
+### <Icon name="currency" weight="fill" /> Submission Fee
 
 A **1 MOVE** submission fee is required to submit your app for review. This one-time fee:
 
@@ -251,10 +251,10 @@ Status codes:
 ### 5. Go Live
 
 Once approved:
-- ✅ App appears in Movement App Store automatically
-- ✅ Users can discover and launch your app
-- ✅ App is marked as "verified" with badge
-- ✅ You can submit updates
+- <Icon name="check-circle" color="var(--vp-c-green-1)" weight="fill" /> App appears in Movement App Store automatically
+- <Icon name="check-circle" color="var(--vp-c-green-1)" weight="fill" /> Users can discover and launch your app
+- <Icon name="check-circle" color="var(--vp-c-green-1)" weight="fill" /> App is marked as "verified" with badge
+- <Icon name="check-circle" color="var(--vp-c-green-1)" weight="fill" /> You can submit updates
 
 ## Updating Your App
 
@@ -496,26 +496,26 @@ Event types:
 
 ### Development
 
-- ✅ **Test thoroughly** - Test all features before submitting
-- ✅ **Handle errors** - Show user-friendly error messages
-- ✅ **Loading states** - Show loading indicators
-- ✅ **Mobile-first** - Design for mobile screens
-- ✅ **Performance** - Optimize images and bundle size
+- <Icon name="check-circle" color="var(--vp-c-green-1)" weight="fill" /> **Test thoroughly** - Test all features before submitting
+- <Icon name="check-circle" color="var(--vp-c-green-1)" weight="fill" /> **Handle errors** - Show user-friendly error messages
+- <Icon name="check-circle" color="var(--vp-c-green-1)" weight="fill" /> **Loading states** - Show loading indicators
+- <Icon name="check-circle" color="var(--vp-c-green-1)" weight="fill" /> **Mobile-first** - Design for mobile screens
+- <Icon name="check-circle" color="var(--vp-c-green-1)" weight="fill" /> **Performance** - Optimize images and bundle size
 
 ### Submission
 
-- ✅ **Clear description** - Explain what your app does
-- ✅ **Appropriate category** - Choose the right category
-- ✅ **Minimal permissions** - Only request what you need
-- ✅ **Professional icon** - Use a clear, recognizable icon URL over HTTPS (.png or .jpg)
-- ✅ **Stable URL** - Don't change your app URL after approval
+- <Icon name="check-circle" color="var(--vp-c-green-1)" weight="fill" /> **Clear description** - Explain what your app does
+- <Icon name="check-circle" color="var(--vp-c-green-1)" weight="fill" /> **Appropriate category** - Choose the right category
+- <Icon name="check-circle" color="var(--vp-c-green-1)" weight="fill" /> **Minimal permissions** - Only request what you need
+- <Icon name="check-circle" color="var(--vp-c-green-1)" weight="fill" /> **Professional icon** - Use a clear, recognizable icon URL over HTTPS (.png or .jpg)
+- <Icon name="check-circle" color="var(--vp-c-green-1)" weight="fill" /> **Stable URL** - Don't change your app URL after approval
 
 ### Updates
 
-- ✅ **Version changes carefully** - Test before requesting update
-- ✅ **Communicate changes** - Update description with new features
-- ✅ **Maintain compatibility** - Don't break existing functionality
-- ✅ **Monitor stats** - Track downloads and ratings
+- <Icon name="check-circle" color="var(--vp-c-green-1)" weight="fill" /> **Version changes carefully** - Test before requesting update
+- <Icon name="check-circle" color="var(--vp-c-green-1)" weight="fill" /> **Communicate changes** - Update description with new features
+- <Icon name="check-circle" color="var(--vp-c-green-1)" weight="fill" /> **Maintain compatibility** - Don't break existing functionality
+- <Icon name="check-circle" color="var(--vp-c-green-1)" weight="fill" /> **Monitor stats** - Track downloads and ratings
 
 ## Support
 

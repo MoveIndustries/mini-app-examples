@@ -161,13 +161,13 @@ https://your-app.vercel.app
 Enter this in Movement app → **Mini App Testing** → **Launch App**
 
 ::: tip STAGING ADVANTAGES
-- ✅ Permanent HTTPS URL (no expiration)
-- ✅ Works from anywhere
-- ✅ Share with team members
-- ✅ Production-like environment
-- ✅ Free tier available
-- ✅ Automatic deployments on git push
-- ✅ Preview deployments for PRs
+- <Icon name="check-circle" color="var(--vp-c-green-1)" weight="fill" /> Permanent HTTPS URL (no expiration)
+- <Icon name="check-circle" color="var(--vp-c-green-1)" weight="fill" /> Works from anywhere
+- <Icon name="check-circle" color="var(--vp-c-green-1)" weight="fill" /> Share with team members
+- <Icon name="check-circle" color="var(--vp-c-green-1)" weight="fill" /> Production-like environment
+- <Icon name="check-circle" color="var(--vp-c-green-1)" weight="fill" /> Free tier available
+- <Icon name="check-circle" color="var(--vp-c-green-1)" weight="fill" /> Automatic deployments on git push
+- <Icon name="check-circle" color="var(--vp-c-green-1)" weight="fill" /> Preview deployments for PRs
 :::
 
 #### Other Options
@@ -254,11 +254,11 @@ Add Eruda for mobile debugging:
 Now shake your device or tap the Eruda icon to open mobile DevTools!
 
 Features:
-- ✅ Console logs
-- ✅ Network requests
-- ✅ Local storage inspection
-- ✅ DOM inspector
-- ✅ Source code viewer
+- <Icon name="check-circle" color="var(--vp-c-green-1)" weight="fill" /> Console logs
+- <Icon name="check-circle" color="var(--vp-c-green-1)" weight="fill" /> Network requests
+- <Icon name="check-circle" color="var(--vp-c-green-1)" weight="fill" /> Local storage inspection
+- <Icon name="check-circle" color="var(--vp-c-green-1)" weight="fill" /> DOM inspector
+- <Icon name="check-circle" color="var(--vp-c-green-1)" weight="fill" /> Source code viewer
 
 ### React DevTools
 
@@ -355,43 +355,43 @@ Before deploying, verify:
 **Problem:** `window.movementSDK` is undefined
 
 **Solutions:**
-- ✅ Ensure you're testing in Movement app
-- ✅ Check Developer Mode is enabled
-- ✅ Try refreshing the mini app
-- ✅ Check console for errors
+- <Icon name="check-circle" color="var(--vp-c-green-1)" weight="fill" /> Ensure you're testing in Movement app
+- <Icon name="check-circle" color="var(--vp-c-green-1)" weight="fill" /> Check Developer Mode is enabled
+- <Icon name="check-circle" color="var(--vp-c-green-1)" weight="fill" /> Try refreshing the mini app
+- <Icon name="check-circle" color="var(--vp-c-green-1)" weight="fill" /> Check console for errors
 
 ### Can't connect from phone
 
 **Problem:** Can't access `http://192.168.1.x:3000`
 
 **Solutions:**
-- ✅ Ensure phone and computer on same WiFi
-- ✅ Check firewall isn't blocking port 3000
-- ✅ Use `0.0.0.0` instead of `localhost`:
+- <Icon name="check-circle" color="var(--vp-c-green-1)" weight="fill" /> Ensure phone and computer on same WiFi
+- <Icon name="check-circle" color="var(--vp-c-green-1)" weight="fill" /> Check firewall isn't blocking port 3000
+- <Icon name="check-circle" color="var(--vp-c-green-1)" weight="fill" /> Use `0.0.0.0` instead of `localhost`:
   ```bash
   npm run dev -- --host 0.0.0.0
   ```
-- ✅ Try tunneling instead (ngrok)
+- <Icon name="check-circle" color="var(--vp-c-green-1)" weight="fill" /> Try tunneling instead (ngrok)
 
 ### App not refreshing
 
 **Problem:** Changes don't appear after refresh
 
 **Solutions:**
-- ✅ Hard refresh: Pull down and release
-- ✅ Clear cache in Settings → Developer → Clear Cache
-- ✅ Restart dev server
-- ✅ Check HMR configuration
+- <Icon name="check-circle" color="var(--vp-c-green-1)" weight="fill" /> Hard refresh: Pull down and release
+- <Icon name="check-circle" color="var(--vp-c-green-1)" weight="fill" /> Clear cache in Settings → Developer → Clear Cache
+- <Icon name="check-circle" color="var(--vp-c-green-1)" weight="fill" /> Restart dev server
+- <Icon name="check-circle" color="var(--vp-c-green-1)" weight="fill" /> Check HMR configuration
 
 ### Slow loading
 
 **Problem:** App takes >5 seconds to load
 
 **Solutions:**
-- ✅ Optimize images (use Next.js Image)
-- ✅ Enable code splitting
-- ✅ Reduce bundle size
-- ✅ Use production build for testing:
+- <Icon name="check-circle" color="var(--vp-c-green-1)" weight="fill" /> Optimize images (use Next.js Image)
+- <Icon name="check-circle" color="var(--vp-c-green-1)" weight="fill" /> Enable code splitting
+- <Icon name="check-circle" color="var(--vp-c-green-1)" weight="fill" /> Reduce bundle size
+- <Icon name="check-circle" color="var(--vp-c-green-1)" weight="fill" /> Use production build for testing:
   ```bash
   npm run build
   npm run start
@@ -402,10 +402,10 @@ Before deploying, verify:
 **Problem:** All transactions fail in testing
 
 **Solutions:**
-- ✅ Check you're on testnet, not mainnet
-- ✅ Ensure wallet has testnet MOVE
-- ✅ Verify transaction payload format
-- ✅ Check console for specific error codes
+- <Icon name="check-circle" color="var(--vp-c-green-1)" weight="fill" /> Check you're on testnet, not mainnet
+- <Icon name="check-circle" color="var(--vp-c-green-1)" weight="fill" /> Ensure wallet has testnet MOVE
+- <Icon name="check-circle" color="var(--vp-c-green-1)" weight="fill" /> Verify transaction payload format
+- <Icon name="check-circle" color="var(--vp-c-green-1)" weight="fill" /> Check console for specific error codes
 
 ## Environment Configuration
 
