@@ -4,11 +4,11 @@
  */
 
 :root {
-  /* Movement brand colors */
-  --vp-c-brand-1: #81ffba;  /* Guild Green */
-  --vp-c-brand-2: #6de5a3;
-  --vp-c-brand-3: #59cc8a;
-  --vp-c-brand-soft: rgba(129, 255, 186, 0.14);
+  /* Movement brand colors - light mode (darker for readability on white) */
+  --vp-c-brand-1: #16a34a;
+  --vp-c-brand-2: #15803d;
+  --vp-c-brand-3: #166534;
+  --vp-c-brand-soft: rgba(22, 163, 74, 0.1);
 
   /* Yellow accent */
   --vp-c-yellow-1: #ffda34;
@@ -44,6 +44,12 @@
 }
 
 .dark {
+  /* Movement brand colors - dark mode (bright green on dark bg) */
+  --vp-c-brand-1: #81ffba;
+  --vp-c-brand-2: #6de5a3;
+  --vp-c-brand-3: #59cc8a;
+  --vp-c-brand-soft: rgba(129, 255, 186, 0.14);
+
   /* Background - Dark mode */
   --vp-c-bg: #0f172a;
   --vp-c-bg-soft: #1e293b;
@@ -81,13 +87,13 @@
 }
 
 ::-webkit-scrollbar-thumb {
-  background: rgba(129, 255, 186, 0.4);
+  background: rgba(22, 163, 74, 0.3);
   border-radius: 4px;
   transition: background 0.2s;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(129, 255, 186, 0.6);
+  background: rgba(22, 163, 74, 0.5);
 }
 
 .dark ::-webkit-scrollbar-thumb {
@@ -412,7 +418,7 @@ html {
 
 .VPFeature:hover {
   border-color: var(--vp-c-brand-1);
-  box-shadow: 0 4px 12px rgba(129, 255, 186, 0.1);
+  box-shadow: 0 4px 12px rgba(22, 163, 74, 0.1);
 }
 
 .VPFeature .icon {

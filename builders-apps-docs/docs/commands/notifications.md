@@ -342,8 +342,8 @@ Test notifications in development:
 
 | Platform | Support | Notes |
 |----------|---------|-------|
-| iOS | ✅ Full | Native push notifications |
-| Android | ✅ Full | Native push notifications |
+| iOS | <Icon name="check-circle" color="var(--vp-c-green-1)" weight="fill" /> Full | Native push notifications |
+| Android | <Icon name="check-circle" color="var(--vp-c-green-1)" weight="fill" /> Full | Native push notifications |
 
 ## Related
 

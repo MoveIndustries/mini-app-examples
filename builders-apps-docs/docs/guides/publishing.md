@@ -8,10 +8,10 @@ Once your mini app is ready, you can publish it to the Move Everything app direc
 
 Before publishing:
 
-- ✅ App is deployed and accessible via HTTPS URL
-- ✅ All features work correctly inside Move Everything
-- ✅ Icon/logo is ready (512x512px recommended)
-- ✅ App has been tested on both iOS and Android
+- <Icon name="check-circle" color="var(--vp-c-green-1)" weight="fill" /> App is deployed and accessible via HTTPS URL
+- <Icon name="check-circle" color="var(--vp-c-green-1)" weight="fill" /> All features work correctly inside Move Everything
+- <Icon name="check-circle" color="var(--vp-c-green-1)" weight="fill" /> Icon/logo is ready (512x512px recommended)
+- <Icon name="check-circle" color="var(--vp-c-green-1)" weight="fill" /> App has been tested on both iOS and Android
 
 ---
 
@@ -84,7 +84,7 @@ Create a JSON file with your app details:
 
 ### 2. Submit for Review
 
-Email your app metadata to: **apps@movementlabs.xyz**
+Email your app metadata to: **apps@moveindustries.xyz**
 
 Include:
 - App metadata JSON
@@ -135,21 +135,21 @@ Declare which SDK features your app uses:
 ## Requirements
 
 ### Security
-- ✅ HTTPS only (no HTTP)
-- ✅ Content Security Policy headers
-- ✅ No external authentication required
-- ✅ Respect rate limits
+- <Icon name="check-circle" color="var(--vp-c-green-1)" weight="fill" /> HTTPS only (no HTTP)
+- <Icon name="check-circle" color="var(--vp-c-green-1)" weight="fill" /> Content Security Policy headers
+- <Icon name="check-circle" color="var(--vp-c-green-1)" weight="fill" /> No external authentication required
+- <Icon name="check-circle" color="var(--vp-c-green-1)" weight="fill" /> Respect rate limits
 
 ### Performance
-- ✅ Load time < 3 seconds
-- ✅ Mobile-optimized design
-- ✅ Works on both iOS and Android
+- <Icon name="check-circle" color="var(--vp-c-green-1)" weight="fill" /> Load time < 3 seconds
+- <Icon name="check-circle" color="var(--vp-c-green-1)" weight="fill" /> Mobile-optimized design
+- <Icon name="check-circle" color="var(--vp-c-green-1)" weight="fill" /> Works on both iOS and Android
 
 ### User Experience
-- ✅ Clear onboarding
-- ✅ Responsive design
-- ✅ Error handling
-- ✅ Loading states
+- <Icon name="check-circle" color="var(--vp-c-green-1)" weight="fill" /> Clear onboarding
+- <Icon name="check-circle" color="var(--vp-c-green-1)" weight="fill" /> Responsive design
+- <Icon name="check-circle" color="var(--vp-c-green-1)" weight="fill" /> Error handling
+- <Icon name="check-circle" color="var(--vp-c-green-1)" weight="fill" /> Loading states
 
 ---
 
@@ -213,9 +213,9 @@ Apps may be removed if they:
 
 Need help publishing?
 
-- **Discord**: [discord.gg/movementlabs](https://discord.gg/movementlabs)
-- **Email**: apps@movementlabs.xyz
-- **Docs**: [docs.movementlabs.xyz](https://docs.movementlabs.xyz)
+- **Discord**: [discord.gg/moveindustries](https://discord.gg/moveindustries)
+- **Email**: apps@moveindustries.xyz
+- **Docs**: [docs.moveindustries.xyz](https://docs.moveindustries.xyz)
 
 ---
 
@@ -223,4 +223,4 @@ Need help publishing?
 
 - **[Advanced Transactions](/guides/advanced-transactions)** - Complex transaction patterns
 - **[Security Guide](/guides/security)** - Best practices
-- **[Examples](https://github.com/movementlabsxyz/miniapp-examples)** - Sample apps
+- **[Examples](https://github.com/moveindustries/miniapp-examples)** - Sample apps

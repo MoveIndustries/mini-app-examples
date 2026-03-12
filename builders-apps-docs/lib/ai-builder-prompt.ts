@@ -16,14 +16,14 @@ Key Features:
 
 ## Installation
 \`\`\`bash
-npm install @movement-labs/miniapp-sdk
+npm install @moveindustries/mini-app-sdk
 \`\`\`
 
 ## Core SDK Functions
 
 ### Basic Setup (Vanilla JavaScript)
 \`\`\`javascript
-import { getMovementSDK } from '@movement-labs/miniapp-sdk';
+import { getMovementSDK } from '@moveindustries/mini-app-sdk';
 
 const sdk = getMovementSDK();
 
@@ -36,7 +36,7 @@ if (sdk) {
 
 ### React/Next.js Hook
 \`\`\`typescript
-import { useMovementSDK } from '@movement-labs/miniapp-sdk';
+import { useMovementSDK } from '@moveindustries/mini-app-sdk';
 
 function MyApp() {
   const { sdk, isConnected, address, connect, sendTransaction } = useMovementSDK();
@@ -234,7 +234,7 @@ sdk.BackButton.onClick(() => { ... });
 
 ## Mainnet
 - Chain ID: 126
-- RPC: https://full.mainnet.movementinfra.xyz/v1
+- RPC: https://mainnet.movementnetwork.xyz/v1
 - Indexer: https://indexer.mainnet.movementnetwork.xyz/v1/graphql
 - Explorer: https://explorer.movementnetwork.xyz
 
@@ -362,7 +362,7 @@ my-miniapp/
     "start": "next start"
   },
   "dependencies": {
-    "@movement-labs/miniapp-sdk": "^0.2.0",
+    "@moveindustries/mini-app-sdk": "^0.2.0",
     "next": "14.0.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0"

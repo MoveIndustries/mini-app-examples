@@ -7,12 +7,14 @@ import './fonts.css';
 
 import './custom.css';
 import AIBuilder from './components/AIBuilder.vue';
+import Icon from './components/Icon.vue';
 import CopyOrDownloadAsMarkdownButtons from 'vitepress-plugin-llms/vitepress-components/CopyOrDownloadAsMarkdownButtons.vue';
 
 export default {
   ...DefaultTheme,
   enhanceApp({ app }) {
     app.component('AIBuilder', AIBuilder);
+    app.component('Icon', Icon);
     app.component('CopyOrDownloadAsMarkdownButtons', CopyOrDownloadAsMarkdownButtons);
   }
 } satisfies Theme;

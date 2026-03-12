@@ -270,38 +270,15 @@ document.addEventListener('DOMContentLoaded', init);
 ## Advanced Example: Token Balance Checker
 
 ```javascript
-async function getBalance() {
-    const sdk = window.movementSDK;
+const sdk = window.movementSDK;
 
-    if (!sdk || !sdk.isConnected) {
-        return null;
-    }
-
-    try {
-        // Get APT coin balance
-        const response = await fetch(
-            `https://fullnode.mainnet.movementlabs.xyz/v1/accounts/${sdk.address}/resource/0x1::coin::CoinStore<0x1::aptos_coin::MovementCoin>`
-        );
-
-        const data = await response.json();
-        const balance = parseInt(data.data.coin.value) / 100000000; // Convert from Octas
-
-        return balance;
-    } catch (error) {
-        console.error('Failed to fetch balance:', error);
-        return null;
-    }
-}
+// Get MOVE balance using the SDK's built-in method
+const balance = await sdk.getBalance();
+console.log('Balance:', balance);
 
 // Display balance
-async function displayBalance() {
-    const balance = await getBalance();
-
-    if (balance !== null) {
-        const balanceEl = document.getElementById('balance');
-        balanceEl.textContent = `${balance.toFixed(4)} APT`;
-    }
-}
+const balanceEl = document.getElementById('balance');
+balanceEl.textContent = `${balance} MOVE`;
 ```
 
 ## Example: Simple Game with Rewards
@@ -447,5 +424,5 @@ vercel deploy
 ## Next Steps
 
 - Explore the [SDK API Reference](/reference/sdk-api)
-- Check out [example projects](https://github.com/movementlabsxyz/miniapp-examples)
+- Check out [example projects](https://github.com/moveindustries/miniapp-examples)
 - Join [Movement Discord](https://discord.gg/movement)

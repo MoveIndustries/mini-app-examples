@@ -13,7 +13,7 @@ The Scaffold App is a comprehensive demo that showcases:
 
 ## Repository
 
-The scaffold app is available in the `mini-app-scaffold` directory of the [mini-app-examples](https://github.com/movementlabsxyz/miniapp-examples) repository.
+The scaffold app is available in the `mini-app-scaffold` directory of the [mini-app-examples](https://github.com/moveindustries/miniapp-examples) repository.
 
 ## Quick Start
 

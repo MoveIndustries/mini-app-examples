@@ -127,7 +127,7 @@ Your mini app will open with the wallet already connected!
 ```bash
 npx create-next-app@latest my-app
 cd my-app
-npm install @movement-labs/miniapp-sdk
+npm install @moveindustries/mini-app-sdk
 ```
 
 See the [Next.js Guide](/examples/nextjs) →
@@ -174,4 +174,4 @@ Check out these example apps:
 - **Coming Soon** - Token Swap Interface
 - **Coming Soon** - NFT Gallery
 
-Browse code on [GitHub](https://github.com/movementlabsxyz/miniapp-examples)
+Browse code on [GitHub](https://github.com/moveindustries/miniapp-examples)

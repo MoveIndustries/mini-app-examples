@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, nextTick, watch } from 'vue'
 import { Aptos, AptosConfig, Network } from '@aptos-labs/ts-sdk'
+import { PhDeviceMobile, PhCheck, PhHandWaving, PhWarning, PhCheckCircle, PhXCircle, PhCurrencyDollarSimple, PhScroll, PhPackage, PhMagnifyingGlass, PhStar, PhDownloadSimple, PhLock } from '@phosphor-icons/vue'
 
 // Registry address - update this after contract deployment
 const REGISTRY_ADDRESS = ref('0xe8c84530749dd8294c635aa5af50d95025dc0261603cb83f69a608e1ded8eb0f')
@@ -1307,7 +1308,7 @@ function handleImageError(event: Event) {
     // Replace the broken image with a fallback emoji
     target.style.display = 'none'
     const fallback = document.createElement('span')
-    fallback.textContent = '📱'
+    fallback.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 256 256"><path d="M176,16H80A24,24,0,0,0,56,40V216a24,24,0,0,0,24,24h96a24,24,0,0,0,24-24V40A24,24,0,0,0,176,16Zm8,200a8,8,0,0,1-8,8H80a8,8,0,0,1-8-8V40a8,8,0,0,1,8-8h96a8,8,0,0,1,8,8ZM140,60a12,12,0,1,1-12-12A12,12,0,0,1,140,60Z"/></svg>'
     target.parentElement.appendChild(fallback)
   }
 }
@@ -1380,7 +1381,8 @@ onMounted(() => {
     <div class="wallet-card-content">
       <div class="wallet-info">
         <div class="wallet-icon-wrapper">
-          <span class="wallet-icon-emoji">{{ connected ? '✓' : '👋' }}</span>
+          <PhCheck v-if="connected" class="wallet-icon-emoji" :size="24" weight="bold" />
+          <PhHandWaving v-else class="wallet-icon-emoji" :size="24" />
         </div>
         <div class="wallet-details">
           <h3 class="wallet-title">{{ connected ? 'Wallet Connected' : 'Connect Your Wallet' }}</h3>
@@ -1463,7 +1465,7 @@ onMounted(() => {
         </div>
         <p class="card-subtitle">{{ editingAppIndex !== null ? 'Update your app details below. Your app will be set to PENDING status and require admin approval.' : 'Fill in the details below to submit your app for review' }}</p>
         <div v-if="editingAppIndex !== null" class="fee-notice" style="background: linear-gradient(135deg, rgba(251, 191, 36, 0.08) 0%, rgba(255, 152, 0, 0.08) 100%); border-color: rgba(251, 191, 36, 0.3); margin-bottom: 1.5rem;">
-          <div class="fee-notice-icon">⚠️</div>
+          <div class="fee-notice-icon"><PhWarning :size="24" weight="fill" /></div>
           <div>
             <strong>Update Request</strong>
             <p>When you submit this update, your app status will change to PENDING and require admin approval before it goes live again.</p>
@@ -1496,7 +1498,7 @@ onMounted(() => {
               v-if="appForm.icon"
               style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); font-size: 18px;"
             >
-              {{ isValidIconUrl(appForm.icon) ? '✅' : '❌' }}
+              <PhCheckCircle v-if="isValidIconUrl(appForm.icon)" :size="18" weight="fill" color="var(--vp-c-green-1)" /><PhXCircle v-else :size="18" weight="fill" color="var(--vp-c-red-1)" />
             </span>
           </div>
           <small>Must be an HTTPS URL ending in .png or .jpg (e.g., https://yourdomain.com/icon.png)</small>
@@ -1523,7 +1525,7 @@ onMounted(() => {
               v-if="appForm.slug"
               style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); font-size: 18px;"
             >
-              {{ isValidSlug(appForm.slug) ? '✅' : '❌' }}
+              <PhCheckCircle v-if="isValidSlug(appForm.slug)" :size="18" weight="fill" color="var(--vp-c-green-1)" /><PhXCircle v-else :size="18" weight="fill" color="var(--vp-c-red-1)" />
             </span>
           </div>
           <small>URL-friendly identifier (lowercase, numbers, hyphens only). Example: bridge-assets, swap-tokens</small>
@@ -1583,7 +1585,7 @@ onMounted(() => {
         </div>
 
         <div v-if="editingAppIndex === null" class="fee-notice">
-          <div class="fee-notice-icon">💰</div>
+          <div class="fee-notice-icon"><PhCurrencyDollarSimple :size="24" weight="fill" /></div>
           <div>
             <strong>Submission Fee: {{ submissionFeeMOVE }} MOVE</strong>
             <p>A one-time fee of {{ submissionFeeMOVE }} MOVE is required to submit your app for review. This helps prevent spam and maintain quality.</p>
@@ -1593,7 +1595,7 @@ onMounted(() => {
         <!-- Developer Agreement Terms -->
         <div class="terms-section">
           <div class="terms-header">
-            <div class="terms-icon">📜</div>
+            <div class="terms-icon"><PhScroll :size="24" /></div>
             <div>
               <strong>Developer Agreement</strong>
               <p>Please read and agree to the Mini App Developer Agreement before submitting</p>
@@ -1657,7 +1659,7 @@ onMounted(() => {
       <h3>Your Apps</h3>
       <div v-if="loading" style="text-align: center; padding: 2rem;">Loading...</div>
       <div v-else-if="developerApps.length === 0" class="empty-state">
-        <div class="empty-state-icon">📦</div>
+        <div class="empty-state-icon"><PhPackage :size="48" /></div>
         <p>You haven't submitted any apps yet</p>
       </div>
       <div v-else class="apps-grid">
@@ -1671,7 +1673,7 @@ onMounted(() => {
                 class="app-icon-image"
                 @error="handleImageError"
               />
-              <span v-else>{{ app.icon || '📱' }}</span>
+              <span v-else><PhDeviceMobile :size="24" /></span>
             </div>
             <div>
               <div class="app-title">{{ app.name }}</div>
@@ -1704,7 +1706,7 @@ onMounted(() => {
       <h3>Active Apps</h3>
       <div v-if="loading" style="text-align: center; padding: 2rem;">Loading...</div>
       <div v-else-if="allActiveApps.length === 0" class="empty-state">
-        <div class="empty-state-icon">🔍</div>
+        <div class="empty-state-icon"><PhMagnifyingGlass :size="48" /></div>
         <p>No active apps found</p>
       </div>
       <div v-else class="apps-grid">
@@ -1718,7 +1720,7 @@ onMounted(() => {
                 class="app-icon-image"
                 @error="handleImageError"
               />
-              <span v-else>{{ app.icon || '📱' }}</span>
+              <span v-else><PhDeviceMobile :size="24" /></span>
             </div>
             <div>
               <div class="app-title">{{ app.name }}</div>
@@ -1727,8 +1729,8 @@ onMounted(() => {
           </div>
           <p class="app-description">{{ app.description }}</p>
           <div class="app-meta">
-            <span>⭐ {{ (app.rating / 10).toFixed(1) }}</span>
-            <span>📥 {{ app.downloads }} downloads</span>
+            <span><PhStar :size="14" weight="fill" style="vertical-align: middle; margin-right: 4px;" />{{ (app.rating / 10).toFixed(1) }}</span>
+            <span><PhDownloadSimple :size="14" style="vertical-align: middle; margin-right: 4px;" />{{ app.downloads }} downloads</span>
             <span>By {{ app.developer_name }}</span>
           </div>
           <a :href="`https://mini-app-sharing.vercel.app/app/${app.slug}`" target="_blank" class="btn" style="display: inline-block; text-decoration: none; font-size: 0.875rem; padding: 0.5rem 1rem; margin-top: 1rem;">
@@ -1740,7 +1742,7 @@ onMounted(() => {
   </div>
 
   <div v-else class="empty-state">
-    <div class="empty-state-icon">🔐</div>
+    <div class="empty-state-icon"><PhLock :size="48" /></div>
     <h3>Connect Your Wallet</h3>
     <p>Please connect your wallet to access the publisher dashboard</p>
   </div>

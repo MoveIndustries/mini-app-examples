@@ -179,8 +179,8 @@ async function sendTokens() {
 
 | Platform | Support | Notes |
 |----------|---------|-------|
-| iOS | ✅ Full | Taptic Engine |
-| Android | ✅ Full | Vibration API |
+| iOS | <Icon name="check-circle" color="var(--vp-c-green-1)" weight="fill" /> Full | Taptic Engine |
+| Android | <Icon name="check-circle" color="var(--vp-c-green-1)" weight="fill" /> Full | Vibration API |
 
 ## Best Practices
 

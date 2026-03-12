@@ -14,7 +14,7 @@ The Social App demonstrates:
 
 ## Repository
 
-The Social app is available in the `mini-app-social` directory of the [mini-app-examples](https://github.com/movementlabsxyz/miniapp-examples) repository.
+The Social app is available in the `mini-app-social` directory of the [mini-app-examples](https://github.com/moveindustries/miniapp-examples) repository.
 
 ## Quick Start
 

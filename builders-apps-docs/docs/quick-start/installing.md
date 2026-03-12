@@ -21,7 +21,7 @@ This creates a fully configured Next.js app with the SDK pre-installed.
 Install the SDK package:
 
 ```bash
-npm install @movement-labs/miniapp-sdk
+npm install @moveindustries/mini-app-sdk
 ```
 
 Use the React hook in your components:
@@ -30,7 +30,7 @@ Use the React hook in your components:
 // app/page.tsx or any component
 'use client';
 
-import { useMovementSDK } from '@movement-labs/miniapp-sdk';
+import { useMovementSDK } from '@moveindustries/mini-app-sdk';
 
 export default function MyComponent() {
   const { sdk, isConnected, address, isLoading } = useMovementSDK();
@@ -182,7 +182,7 @@ Always use both methods together. The `useMovementSDK()` hook automatically call
 ::: code-group
 
 ```typescript [React]
-import { useMovementSDK } from '@movement-labs/miniapp-sdk';
+import { useMovementSDK } from '@moveindustries/mini-app-sdk';
 
 function App() {
   const { sdk, isLoading, error } = useMovementSDK();
@@ -301,7 +301,7 @@ import type {
   TransactionPayload,
   TransactionResult,
   SignMessagePayload
-} from '@movement-labs/miniapp-sdk';
+} from '@moveindustries/mini-app-sdk';
 
 // Full type safety
 const payload: TransactionPayload = {
@@ -352,7 +352,7 @@ Ensure your build is optimized:
 - Check Developer Mode is enabled in Settings
 
 **TypeScript errors?**
-- Update to latest SDK: `npm install @movement-labs/miniapp-sdk@latest`
+- Update to latest SDK: `npm install @moveindustries/mini-app-sdk@latest`
 - Restart your TypeScript server
 
 **Build errors?**
