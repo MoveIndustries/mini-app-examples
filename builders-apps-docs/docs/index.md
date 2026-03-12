@@ -224,7 +224,7 @@ curl -o llms-full.txt https://mini-app-docs.vercel.app/llms-full.txt
   display: inline-block;
   padding: 0.5rem 1rem;
   background: var(--vp-c-brand-soft);
-  border: 1px solid var(--color-guild-green-400, #6ce2a1);
+  border: 1px solid var(--vp-c-brand-1);
   border-radius: 20px;
   font-size: 0.875rem;
   font-weight: 500;
@@ -249,7 +249,7 @@ curl -o llms-full.txt https://mini-app-docs.vercel.app/llms-full.txt
 
 .feature-card:hover {
   background: var(--color-neutrals-white-alpha-100, rgba(255, 255, 255, 0.05));
-  border-color: var(--color-guild-green-400, #6ce2a1);
+  border-color: var(--vp-c-brand-1);
   transform: translateY(-2px);
 }
 
@@ -383,7 +383,7 @@ curl -o llms-full.txt https://mini-app-docs.vercel.app/llms-full.txt
 
 .resource-card:hover {
   background: var(--color-neutrals-white-alpha-100, rgba(255, 255, 255, 0.05));
-  border-color: var(--color-guild-green-400, #6ce2a1);
+  border-color: var(--vp-c-brand-1);
   transform: translateY(-2px);
 }
 
@@ -443,17 +443,17 @@ curl -o llms-full.txt https://mini-app-docs.vercel.app/llms-full.txt
   align-items: center;
   gap: 1rem;
   padding: 1.25rem;
-  background: linear-gradient(135deg, rgba(108, 226, 161, 0.1), rgba(108, 226, 161, 0.02));
-  border: 1px solid var(--color-guild-green-400, #6ce2a1);
+  background: linear-gradient(135deg, var(--vp-c-brand-soft), transparent);
+  border: 1px solid var(--vp-c-brand-1);
   border-radius: 12px;
   text-decoration: none;
   transition: all 0.2s;
 }
 
 .ai-doc-card:hover {
-  background: linear-gradient(135deg, rgba(108, 226, 161, 0.15), rgba(108, 226, 161, 0.05));
+  background: linear-gradient(135deg, var(--vp-c-brand-soft), transparent);
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(108, 226, 161, 0.2);
+  box-shadow: 0 4px 12px var(--vp-c-brand-soft);
 }
 
 .ai-doc-icon {
